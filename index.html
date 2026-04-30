@@ -76,8 +76,10 @@
     background:var(--bg-elev);border-right:1px solid var(--border);
     display:flex;flex-direction:column;
     position:fixed;top:0;left:0;bottom:0;z-index:100;
-    transition:transform .25s ease;
+    transition:transform .25s ease, box-shadow .25s ease;
+    transform:translateX(-100%);
   }
+  .sidebar.open{transform:translateX(0);box-shadow:0 0 60px rgba(0,0,0,.3)}
   .sidebar-brand{
     padding:20px 22px;display:flex;align-items:center;gap:10px;
     border-bottom:1px solid var(--border);
@@ -129,16 +131,28 @@
 
   /* ===== MAIN CONTENT ===== */
   .main{
-    flex:1;margin-left:var(--sidebar-w);
+    flex:1;margin-left:0;
     min-height:100vh;background:var(--bg);
+    transition:filter .25s ease;
   }
+  .main.sidebar-blur{filter:blur(2px) brightness(0.95)}
   .topbar{
     position:sticky;top:0;z-index:50;
     background:rgba(250,247,242,.85);backdrop-filter:blur(12px);
     border-bottom:1px solid var(--border);
     padding:14px 28px;display:flex;align-items:center;gap:16px;
   }
-  .menu-toggle{display:none;width:38px;height:38px;align-items:center;justify-content:center;border-radius:8px;color:var(--ink-light)}
+  .new-btn{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 14px;border-radius:8px;border:none;
+    cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+    color:#fff;box-shadow:0 2px 8px rgba(139,94,60,.25);
+    font-family:'Noto Sans Bengali',sans-serif;font-size:13px;font-weight:600;
+    transition:all .15s;
+  }
+  .new-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(139,94,60,.35)}
+  .new-btn .icon{width:16px;height:16px;stroke:#fff}
+  .menu-toggle{display:flex;width:38px;height:38px;align-items:center;justify-content:center;border-radius:8px;color:var(--ink-light);flex-shrink:0}
   .menu-toggle:hover{background:var(--bg-soft)}
   .topbar-title{font-size:18px;font-weight:700;color:var(--ink);font-family:'Noto Sans Bengali',sans-serif;flex:1}
   .topbar-sub{font-size:12px;color:var(--ink-lighter);font-weight:400;margin-top:1px}
@@ -563,10 +577,8 @@
   /* ===== MOBILE & DEVICE RESPONSIVE ===== */
   @media (max-width:768px){
     :root{--sidebar-w:0px; --page-w:100%; --mt:10mm; --mb:10mm; --ml:12mm; --mr:10mm;}
-    .sidebar{transform:translateX(-100%);width:260px}
-    .sidebar.open{transform:translateX(0);box-shadow:0 0 60px rgba(0,0,0,.3)}
+    .sidebar{width:260px}
     .main{margin-left:0}
-    .menu-toggle{display:flex}
     .topbar{padding:10px 16px;gap:10px;justify-content:space-between}
     .topbar-sub{display:none}
     .topbar-title{font-size:16px}
@@ -788,7 +800,7 @@
         <svg class="icon icon-md"><use href="#i-cloud"/></svg>
         <span id="sync-text">সিঙ্ক...</span>
       </div>
-      <button class="btn btn-primary" onclick="navigate('editor');resetForm()">
+      <button class="btn btn-primary new-btn" onclick="navigate('editor');resetForm()">
         <svg class="icon icon-md"><use href="#i-plus"/></svg>
         <span>নতুন</span>
       </button>
@@ -1667,14 +1679,26 @@ function navigate(view, opts={}){
     closeTagDropdown();
   }
 
-  // Close mobile sidebar
-  $('sidebar').classList.remove('open');
-  $('sidebar-overlay').classList.remove('show');
+  // Close sidebar on navigation
+  closeSidebar();
 }
 
 function toggleSidebar(){
-  $('sidebar').classList.toggle('open');
-  $('sidebar-overlay').classList.toggle('show');
+  const sidebar = $('sidebar');
+  const overlay = $('sidebar-overlay');
+  const main = document.querySelector('.main');
+  const isOpen = sidebar.classList.toggle('open');
+  overlay.classList.toggle('show', isOpen);
+  main.classList.toggle('sidebar-blur', isOpen);
+}
+
+function closeSidebar(){
+  const sidebar = $('sidebar');
+  const overlay = $('sidebar-overlay');
+  const main = document.querySelector('.main');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('show');
+  main.classList.remove('sidebar-blur');
 }
 
 // ============== DASHBOARD ==============
@@ -2530,6 +2554,14 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Allow ESC to go back
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && currentView === 'reader') navigate('library');
+    if (e.key === 'Escape') closeSidebar();
+  });
+
+  // Close sidebar when tapping outside (on the main content area)
+  document.querySelector('.main').addEventListener('click', (e) => {
+    if (!$('sidebar').classList.contains('open')) return;
+    if (e.target.closest('.topbar') || e.target.closest('.topbar *')) return;
+    closeSidebar();
   });
 
   // ====== SERVICE WORKER REGISTRATION ======
