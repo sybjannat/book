@@ -411,6 +411,55 @@
   .editor-footer{padding:16px 26px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg-soft)}
   .editor-footer-info{font-size:11.5px;color:var(--ink-lighter);font-family:'Noto Sans Bengali',sans-serif}
 
+  /* ===== AUTHORS VIEW ===== */
+  .authors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .author-card{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:all .2s}
+  .author-card:hover{border-color:var(--accent-light);box-shadow:var(--shadow);transform:translateY(-2px)}
+  .author-card-top{padding:16px 18px;background:linear-gradient(135deg,var(--bg-soft),var(--bg-elev));border-bottom:1px solid var(--border-soft);display:flex;align-items:center;gap:14px}
+  .author-avatar{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Noto Serif Bengali',serif;font-weight:700;font-size:16px;flex-shrink:0}
+  .author-card-name{font-size:14px;font-weight:700;color:var(--ink);font-family:'Noto Sans Bengali',sans-serif;margin-bottom:1px}
+  .author-card-meta{font-size:11px;color:var(--ink-lighter);font-family:'Noto Sans Bengali',sans-serif}
+  .author-card-body{padding:14px 18px}
+  .author-detail-row{display:flex;gap:6px;margin-bottom:8px;font-size:11.5px}
+  .author-detail-label{font-weight:600;color:var(--accent);min-width:55px;font-family:'Noto Sans Bengali',sans-serif}
+  .author-detail-value{color:var(--ink-light);font-family:'Noto Sans Bengali',sans-serif;flex:1;line-height:1.5}
+  .author-book-list{padding:10px 18px 14px;border-top:1px solid var(--border-soft)}
+  .author-book-list-title{font-size:10.5px;font-weight:600;color:var(--ink-lighter);margin-bottom:8px;font-family:'Noto Sans Bengali',sans-serif}
+  .author-book-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;transition:background .15s;font-size:11.5px;font-family:'Noto Sans Bengali',sans-serif}
+  .author-book-item:hover{background:var(--bg-soft)}
+  .author-book-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
+  .author-book-item-title{color:var(--ink);font-weight:600}
+  .author-book-item-mode{font-size:10px;color:var(--ink-lighter);margin-left:auto}
+
+  /* ===== AUTHOR DROPDOWN ===== */
+  .author-dropdown-wrap{position:relative}
+  .author-dropdown{
+    position:absolute;top:100%;left:0;right:0;z-index:100;
+    background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;
+    box-shadow:var(--shadow-lg);max-height:220px;overflow-y:auto;display:none;
+  }
+  .author-dropdown.open{display:block}
+  .author-dropdown-item{
+    display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;
+    transition:background .12s;border-bottom:1px solid var(--border-soft);
+  }
+  .author-dropdown-item:last-child{border-bottom:none}
+  .author-dropdown-item:hover{background:var(--bg-soft)}
+  .author-dropdown-avatar{
+    width:30px;height:30px;border-radius:7px;background:var(--accent);
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    font-size:12px;font-weight:700;flex-shrink:0;
+  }
+  .author-dropdown-info{flex:1;min-width:0}
+  .author-dropdown-name{font-size:13px;font-weight:600;color:var(--ink);font-family:'Noto Sans Bengali',sans-serif}
+  .author-dropdown-sub{font-size:11px;color:var(--ink-lighter);font-family:'Noto Sans Bengali',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .author-dropdown-new{
+    display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;
+    transition:background .12s;background:var(--bg-soft);border-top:1px solid var(--border);
+  }
+  .author-dropdown-new:hover{background:var(--gold-soft)}
+  .author-dropdown-new .icon{color:var(--accent)}
+
   /* ===== SETTINGS ===== */
   .settings-section{margin-bottom:24px}
   .settings-card{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 22px}
@@ -612,6 +661,15 @@
     </div>
 
     <div class="sidebar-section">
+      <div class="sidebar-label">রেফারেন্স</div>
+      <button class="nav-item" data-view="authors" onclick="navigate('authors')">
+        <svg class="icon icon-md"><use href="#i-users"/></svg>
+        <span>লেখক পরিচিত</span>
+        <span class="nav-count" id="nav-count-authors">0</span>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
       <div class="sidebar-label">System</div>
       <button class="nav-item" data-view="settings" onclick="navigate('settings')">
         <svg class="icon icon-md"><use href="#i-settings"/></svg>
@@ -655,6 +713,15 @@
         <span>নতুন</span>
       </button>
     </div>
+
+    <!-- ================== VIEW: AUTHORS ================== -->
+    <section class="view" id="view-authors">
+      <div class="view-header">
+        <h1 class="view-title">লেখক পরিচিত</h1>
+        <p class="view-subtitle">সংরক্ষিত গ্রন্থ সমালোচনা ও প্রবন্ধের সকল লেখকদের তালিকা।</p>
+      </div>
+      <div id="authors-container"></div>
+    </section>
 
     <!-- ================== VIEW: DASHBOARD ================== -->
     <section class="view active" id="view-dashboard">
@@ -1041,7 +1108,11 @@ function setSyncStatus(status, msg){
 
 // ============== SUPABASE OPS ==============
 async function cloudFetchAll(){
-  if (!sb) return null;
+  if (!sb) {
+    // No Supabase — fallback to localStorage
+    console.warn('[DB] Supabase not available, using localStorage');
+    return JSON.parse(localStorage.getItem('books') || '[]');
+  }
   try {
     setSyncStatus('syncing', 'লোড হচ্ছে...');
     const { data, error } = await sb.from(TABLE_NAME).select('*').order('created_at', {ascending: true});
@@ -1112,10 +1183,11 @@ async function cloudClearAll(){
 }
 
 async function syncFromCloud(){
+  setSyncStatus('syncing', 'সিঙ্ক হচ্ছে...');
   const cloudBooks = await cloudFetchAll();
   if (cloudBooks !== null){
     books = cloudBooks;
-    localStorage.setItem('books', JSON.stringify(books));
+    localStorage.setItem('_cache_books', JSON.stringify(books));
     refreshUI();
     toast('ক্লাউড থেকে ডেটা সিঙ্ক হয়েছে (' + bn(books.length) + 'টি)', 'success');
   } else {
@@ -1193,9 +1265,57 @@ function toast(msg, type=''){
   window._toastTO = setTimeout(()=>t.classList.remove('show'), 3500);
 }
 
-function save(){
-  localStorage.setItem('books', JSON.stringify(books));
+async function save(book){
+  if (book){
+    // Save single book to Supabase
+    book.mode = book.mode || currentMode || 'critique';
+    const ok = await cloudUpsert(book);
+    if (ok){
+      // Update local array
+      const idx = books.findIndex(b => b.id === book.id);
+      if (idx > -1) books[idx] = book;
+      else books.push(book);
+    }
+  }
+  // Sync local cache
+  localStorage.setItem('_cache_books', JSON.stringify(books));
   refreshUI();
+}
+
+async function loadBooks(){
+  // 1. Try Supabase
+  const cloudBooks = await cloudFetchAll();
+  if (cloudBooks !== null){
+    books = cloudBooks;
+    localStorage.setItem('_cache_books', JSON.stringify(books));
+    setSyncStatus('synced', 'ক্লাউড থেকে লোড');
+    return true;
+  }
+  // 2. Fallback to cache
+  const cached = JSON.parse(localStorage.getItem('_cache_books') || '[]');
+  if (cached.length > 0){
+    books = cached;
+    setSyncStatus('offline', 'ক্যাশ থেকে লোড');
+    return true;
+  }
+  setSyncStatus('error', 'ডেটা নেই');
+  return false;
+}
+
+async function removeFromCloud(id){
+  if (!sb) {
+    books = books.filter(b => b.id !== id);
+    localStorage.setItem('_cache_books', JSON.stringify(books));
+    refreshUI();
+    return true;
+  }
+  const ok = await cloudDelete(id);
+  if (ok){
+    books = books.filter(b => b.id !== id);
+    localStorage.setItem('_cache_books', JSON.stringify(books));
+    refreshUI();
+  }
+  return ok;
 }
 
 function refreshUI(){
@@ -1507,17 +1627,16 @@ function editCurrentBook(){
   navigate('editor');
 }
 
-function deleteCurrentBook(){
+async function deleteCurrentBook(){
   const b = books.find(x => x.id === currentBookId);
   if (!b) return;
   if (!confirm('"' + b.bookName + '" মুছে ফেলতে চান? এই কাজ অপরিবর্তনীয়।')) return;
-  books = books.filter(x => x.id !== currentBookId);
-  save();
+  await removeFromCloud(currentBookId);
   toast('সমালোচনা মুছে ফেলা হয়েছে', 'success');
   navigate('library');
 }
 
-function saveBook(){
+async function saveBook(){
   const bookName = $('f-bookName').value.trim();
   const authorName = currentMode === 'essay'
     ? ($('f-authorName').value.trim() || 'প্রাবন্ধিক')
@@ -1562,16 +1681,14 @@ function saveBook(){
     chars, analyses
   };
 
+  // Save to Supabase
+  await save(data);
+  editingBookId = null;
   if (editingBookId){
-    const idx = books.findIndex(x => x.id === editingBookId);
-    if (idx > -1) books[idx] = data;
     toast('"' + bookName + '" আপডেট হয়েছে', 'success');
   } else {
-    books.push(data);
     toast('"' + bookName + '" যোগ করা হয়েছে', 'success');
   }
-  save();
-  editingBookId = null;
   openBook(data.id);
 }
 
@@ -1828,18 +1945,27 @@ ${renderEssayPages(essays, critiques.length + 1)}
   toast('PDF-ready HTML ফাইল রপ্তানি সম্পন্ন! ব্রাউজারে খুলে Print > Save as PDF নির্বাচন করুন।', 'success');
 }
 
-function importData(e){
+async function importData(e){
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (ev) => {
+  reader.onload = async (ev) => {
     try {
       const data = JSON.parse(ev.target.result);
       if (!Array.isArray(data)) throw new Error('Invalid format');
       if (!confirm(bn(data.length) + 'টি সমালোচনা ইম্পোর্ট করতে চান? বর্তমান ডেটা প্রতিস্থাপিত হবে।')) return;
-      books = data;
-      save();
-      toast(bn(data.length) + 'টি সমালোচনা ইম্পোর্ট হয়েছে', 'success');
+      // Import each book to Supabase
+      let successCount = 0;
+      for (const b of data) {
+        b.mode = b.mode || 'critique';
+        if (await cloudUpsert(b)){
+          books.push(b);
+          successCount++;
+        }
+      }
+      localStorage.setItem('_cache_books', JSON.stringify(books));
+      refreshUI();
+      toast(bn(successCount) + 'টি সমালোচনা ইম্পোর্ট হয়েছে', 'success');
     } catch (err) {
       toast('ভুল ফাইল ফরম্যাট', 'error');
     }
@@ -1848,18 +1974,28 @@ function importData(e){
   e.target.value = '';
 }
 
-function clearAllData(){
+async function clearAllData(){
   if (!confirm('সকল ডেটা মুছে ফেলবেন? এটি অপরিবর্তনীয়!')) return;
   if (!confirm('আপনি কি ১০০% নিশ্চিত? শেষবার নিশ্চিত করুন।')) return;
   books = [];
-  save();
+  localStorage.setItem('_cache_books', JSON.stringify(books));
+  // Clear Supabase
+  await cloudClearAll();
+  refreshUI();
   toast('সব ডেটা মুছে ফেলা হয়েছে', 'success');
   navigate('dashboard');
 }
 
 // ============== INIT ==============
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   setMode(currentMode);
+  // Load books from Supabase
+  setSyncStatus('syncing', 'ডেটা লোড হচ্ছে...');
+  const loaded = await loadBooks();
+  if (!loaded){
+    books = [];
+  }
+  refreshUI();
   // Allow ESC to go back
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && currentView === 'reader') navigate('library');
