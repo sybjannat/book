@@ -180,14 +180,19 @@
   /* ===== DASHBOARD ===== */
   .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
   .stat-card{
-    background:var(--bg-elev);border-radius:var(--r-lg);padding:18px 20px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:20px 16px;gap:6px;
+    background:var(--bg-elev);border-radius:var(--r-lg);
     border:1px solid var(--border);transition:all .2s;position:relative;overflow:hidden;
+    min-height:120px;
   }
   .stat-card:hover{border-color:var(--accent-light);transform:translateY(-2px);box-shadow:var(--shadow)}
   .stat-icon{
-    width:42px;height:42px;border-radius:10px;
-    display:flex;align-items:center;justify-content:center;margin-bottom:12px;
+    width:40px;height:40px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
   }
+  .stat-value{font-size:26px;font-weight:800;color:var(--ink);line-height:1.1;font-family:'Noto Serif Bengali',serif}
+  .stat-label{font-size:11px;font-weight:600;color:var(--ink-lighter);line-height:1.3;font-family:'Noto Sans Bengali',sans-serif}
   .stat-icon.brown{background:rgba(139,94,60,.1);color:var(--accent)}
   .stat-icon.green{background:rgba(92,122,94,.1);color:var(--green)}
   .stat-icon.blue{background:rgba(74,109,124,.1);color:var(--blue)}
@@ -251,6 +256,32 @@
   /* ===== LIBRARY (BOOK GRID) ===== */
   .library-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
   .filter-chips{display:flex;gap:6px;flex-wrap:wrap}
+  .tag-chip{position:relative;display:flex;align-items:center;gap:5px;border:1px solid rgba(139,94,60,.3)!important;background:rgba(139,94,60,.08)!important;color:var(--accent)!important}
+  .tag-chip:hover{background:rgba(139,94,60,.15)!important;border-color:rgba(139,94,60,.5)!important}
+  .tag-chip.active{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important}
+  .tag-chip.active .icon{stroke:#fff}
+  .tag-dropdown{
+    display:none;position:fixed;top:0;left:0;z-index:1000;
+    background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;
+    box-shadow:0 8px 30px rgba(0,0,0,.12);min-width:200px;max-height:260px;overflow-y:auto;
+  }
+  .tag-dropdown.open{display:block}
+  .tag-dropdown-item{
+    padding:8px 14px;cursor:pointer;font-size:12.5px;font-family:'Noto Sans Bengali',sans-serif;
+    border-bottom:1px solid var(--border-soft);transition:background .12s;
+    display:flex;align-items:center;gap:8px;color:var(--ink);
+  }
+  .tag-dropdown-item:last-child{border-bottom:none}
+  .tag-dropdown-item:hover{background:var(--bg-soft)}
+  .tag-dropdown-item.active{background:rgba(139,94,60,.08);color:var(--accent);font-weight:600}
+  .tag-dropdown-item .tag-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.4}
+  .tag-dropdown-item.active .tag-dot{opacity:1}
+  .tag-dropdown-clear{
+    padding:8px 14px;cursor:pointer;font-size:12px;font-family:'Noto Sans Bengali',sans-serif;
+    background:var(--bg-soft);color:var(--ink-light);text-align:center;border-top:1px solid var(--border-soft);
+    transition:background .12s;
+  }
+  .tag-dropdown-clear:hover{background:var(--gold-soft)}
   .chip{
     padding:5px 12px;border:1px solid var(--border);border-radius:14px;
     font-size:11.5px;font-weight:600;color:var(--ink-light);cursor:pointer;
@@ -347,7 +378,7 @@
   .section-title-light{font-size:11.5pt;font-weight:400;color:#8A7E75;margin-top:3px}
   .section-divider{width:70px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);margin:10px auto 0}
   .page h2{font-size:14.5pt;font-weight:700;color:#2C2420;margin-top:24px;margin-bottom:12px;padding-bottom:5px;border-bottom:1px solid #E8D5B0;line-height:1.5}
-  .page p{font-size:10.5pt;text-align:justify;margin-bottom:10px;line-height:1.9;text-indent:2em;hyphens:auto}
+  .page p{font-size:10.5pt;text-align:justify;margin-bottom:10px;line-height:1.9;text-indent:0}
   .page p.no-indent{text-indent:0}
   .drop-cap::first-letter{font-size:3em;float:left;line-height:.78;margin:3px 7px 0 0;color:var(--accent);font-weight:700}
   .page blockquote{margin:14px 0;padding:12px 18px;border-left:3px solid var(--accent);background:rgba(139,94,60,.04);border-radius:0 6px 6px 0;font-style:italic}
@@ -460,6 +491,43 @@
   .author-dropdown-new:hover{background:var(--gold-soft)}
   .author-dropdown-new .icon{color:var(--accent)}
 
+  /* ===== CHARACTERS VIEW ===== */
+  .char-book-group{margin-bottom:24px}
+  .char-book-header{
+    display:flex;align-items:center;gap:12px;padding:14px 18px;
+    background:var(--bg-soft);border-radius:12px 12px 0 0;border:1px solid var(--border);
+    cursor:pointer;transition:background .15s;
+  }
+  .char-book-header:hover{background:var(--gold-soft)}
+  .char-book-cover{
+    width:40px;height:52px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:'Noto Serif Bengali',serif;font-weight:700;font-size:14px;flex-shrink:0;
+    box-shadow:0 2px 6px rgba(0,0,0,.2);
+  }
+  .char-book-title{font-size:15px;font-weight:700;color:var(--ink);font-family:'Noto Sans Bengali',sans-serif;margin-bottom:2px}
+  .char-book-author{font-size:11.5px;color:var(--ink-lighter);font-family:'Noto Sans Bengali',sans-serif}
+  .char-book-badge{
+    margin-left:auto;padding:3px 10px;border-radius:10px;font-size:10.5px;font-weight:600;
+    background:var(--accent);color:#fff;font-family:'Noto Sans Bengali',sans-serif;
+  }
+  .char-list{
+    border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;
+    overflow:hidden;background:var(--bg-elev);
+  }
+  .char-item{
+    display:flex;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border-soft);
+    transition:background .12s;
+  }
+  .char-item:last-child{border-bottom:none}
+  .char-item:hover{background:var(--bg-soft)}
+  .char-avatar{
+    width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:'Noto Serif Bengali',serif;font-weight:700;font-size:14px;flex-shrink:0;
+  }
+  .char-info{flex:1;min-width:0}
+  .char-name{font-size:13px;font-weight:700;color:var(--ink);font-family:'Noto Sans Bengali',sans-serif;margin-bottom:2px}
+  .char-desc{font-size:12px;color:var(--ink-light);line-height:1.6;font-family:'Noto Sans Bengali',sans-serif}
+
   /* ===== SETTINGS ===== */
   .settings-section{margin-bottom:24px}
   .settings-card{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 22px}
@@ -527,9 +595,10 @@
     .reader-toolbar .btn-sm{padding:4px 8px;font-size:11px}
     
     #reader-pages{padding:0}
-    #reader-pages .page{width:100%;padding:14mm 12mm 10mm 14mm;min-height:auto;margin:6px auto;border-radius:0;box-shadow:none}
+    #reader-pages .page{width:100%;padding:4mm 4mm 3mm 4mm;min-height:auto;margin:0 auto;border-radius:0;box-shadow:none}
+    #reader-pages{padding:0}
     .page h2{font-size:13pt;margin-top:18px}
-    .page p{font-size:10pt;line-height:1.8;text-indent:1.5em;margin-bottom:8px}
+    .page p{font-size:10pt;line-height:1.8;text-indent:0;margin-bottom:8px}
     .page blockquote{padding:10px 14px;margin:10px 0}
     .char-card,.author-profile,.analysis-box{padding:12px 14px;margin:10px 0}
     
@@ -538,7 +607,8 @@
     .settings-row .btn{width:100%;justify-content:center}
     
     .library-toolbar{flex-direction:column;align-items:stretch}
-    .filter-chips{justify-content:center}
+    .filter-chips{justify-content:center;flex-wrap:wrap}
+    .tag-dropdown{max-height:200px}
     .book-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
     .book-cover{height:160px;padding:12px}
     .book-cover-title{font-size:14px}
@@ -546,7 +616,11 @@
   }
   
   @media (max-width:480px){
-    .stats-grid{grid-template-columns:1fr}
+    .stats-grid{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    .stat-card{padding:14px 12px;min-height:100px;gap:4px}
+    .stat-value{font-size:24px}
+    .stat-icon{width:34px;height:34px}
+    .stat-label{font-size:10.5px}
     .topbar{padding:10px 12px}
     .library-search{max-width:none}
     .topbar .btn{padding:6px 10px;font-size:12px}
@@ -614,6 +688,7 @@
   <symbol id="i-refresh" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
   <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
   <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></symbol>
   <symbol id="i-cloud-off" viewBox="0 0 24 24"><path d="M22.61 16.95A5 5 0 0 0 18 10h-1.26a8 8 0 0 0-7.05-6M5 5a8 8 0 0 0 4 15h9a5 5 0 0 0 1.7-.3"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
   <symbol id="i-cloud-check" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="9 14 11 16 15 12"/></symbol>
@@ -656,7 +731,7 @@
       </button>
       <button class="nav-item" data-view="editor" onclick="navigate('editor');resetForm()">
         <svg class="icon icon-md"><use href="#i-edit-3"/></svg>
-        <span>নতুন সমালোচনা</span>
+        <span id="nav-editor-label">নতুন সমালোচনা</span>
       </button>
     </div>
 
@@ -666,6 +741,11 @@
         <svg class="icon icon-md"><use href="#i-users"/></svg>
         <span>লেখক পরিচিত</span>
         <span class="nav-count" id="nav-count-authors">0</span>
+      </button>
+      <button class="nav-item" data-view="characters" onclick="navigate('characters')">
+        <svg class="icon icon-md"><use href="#i-user"/></svg>
+        <span>চরিত্র পরিচিতি</span>
+        <span class="nav-count" id="nav-count-chars">0</span>
       </button>
     </div>
 
@@ -723,6 +803,15 @@
       <div id="authors-container"></div>
     </section>
 
+    <!-- ================== VIEW: CHARACTERS ================== -->
+    <section class="view" id="view-characters">
+      <div class="view-header">
+        <h1 class="view-title">চরিত্র পরিচিতি</h1>
+        <p class="view-subtitle">গ্রন্থ সমালোচনার সকল চরিত্র — বই অনুযায়ী সাজানো।</p>
+      </div>
+      <div id="characters-container"></div>
+    </section>
+
     <!-- ================== VIEW: DASHBOARD ================== -->
     <section class="view active" id="view-dashboard">
       <div class="view-header">
@@ -731,25 +820,25 @@
       </div>
 
       <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" id="stat-card-1">
           <div class="stat-icon brown"><svg class="icon icon-lg"><use href="#i-books"/></svg></div>
           <div class="stat-value" id="stat-books">০</div>
-          <div class="stat-label">মোট গ্রন্থ সমালোচনা</div>
+          <div class="stat-label" id="stat-label-1">মোট গ্রন্থ সমালোচনা</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" id="stat-card-2">
           <div class="stat-icon green"><svg class="icon icon-lg"><use href="#i-feather"/></svg></div>
           <div class="stat-value" id="stat-authors">০</div>
-          <div class="stat-label">লেখকের সংখ্যা</div>
+          <div class="stat-label" id="stat-label-2">লেখকের সংখ্যা</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" id="stat-card-3">
           <div class="stat-icon blue"><svg class="icon icon-lg"><use href="#i-users"/></svg></div>
           <div class="stat-value" id="stat-chars">০</div>
-          <div class="stat-label">মোট চরিত্র</div>
+          <div class="stat-label" id="stat-label-3">মোট চরিত্র</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" id="stat-card-4">
           <div class="stat-icon gold"><svg class="icon icon-lg"><use href="#i-file-text"/></svg></div>
           <div class="stat-value" id="stat-chapters">০</div>
-          <div class="stat-label">সমালোচনা অধ্যায়</div>
+          <div class="stat-label" id="stat-label-4">সমালোচনা অধ্যায়</div>
         </div>
       </div>
 
@@ -775,8 +864,8 @@
               <button class="action-btn" onclick="navigate('editor');resetForm()">
                 <div class="action-icon"><svg class="icon icon-md"><use href="#i-plus"/></svg></div>
                 <div>
-                  <div class="action-text">নতুন সমালোচনা যোগ করুন</div>
-                  <div class="action-sub">সম্পূর্ণ গ্রন্থ সমালোচনা তৈরি করুন</div>
+                  <div class="action-text" id="action-editor-text">নতুন সমালোচনা যোগ করুন</div>
+                  <div class="action-sub" id="action-editor-sub">সম্পূর্ণ গ্রন্থ সমালোচনা তৈরি করুন</div>
                 </div>
               </button>
               <button class="action-btn" onclick="navigate('library')">
@@ -822,7 +911,12 @@
           <button class="chip active" data-filter="all" onclick="setFilter('all',this)">সব</button>
           <button class="chip" data-filter="recent" onclick="setFilter('recent',this)">সাম্প্রতিক</button>
           <button class="chip" data-filter="alpha" onclick="setFilter('alpha',this)">বর্ণানুক্রম</button>
+          <button class="chip tag-chip" id="tag-filter-wrap" style="display:none;position:relative" onclick="toggleTagDropdown()">
+            <svg class="icon icon-sm"><use href="#i-filter"/></svg>
+            <span id="tag-filter-label">বিষয়শ্রেণি</span>
+          </button>
         </div>
+        <div class="tag-dropdown" id="tag-dropdown"></div>
       </div>
 
       <div id="library-empty" class="empty" style="display:none">
@@ -900,6 +994,18 @@
           <!-- AUTHOR -->
           <div class="form-section" id="form-sec-author">
             <div class="form-section-title"><svg class="icon"><use href="#i-feather"/></svg> <span id="lbl-author-info">লেখক পরিচিতি</span></div>
+            <!-- Author dropdown (critique mode only) -->
+            <div class="form-row full" id="form-row-author-select">
+              <div class="author-dropdown-wrap">
+                <label class="form-label">বিদ্যমান লেখক থেকে নির্বাচন করুন</label>
+                <div id="author-select-btn" class="form-input" style="cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--ink-lighter)" onclick="toggleAuthorDropdown()">
+                  <svg class="icon icon-sm"><use href="#i-users"/></svg>
+                  <span id="author-select-label">লেখক নির্বাচন করুন...</span>
+                  <svg class="icon icon-sm" style="margin-left:auto"><use href="#i-arrow-right"/></svg>
+                </div>
+                <div id="author-dropdown" class="author-dropdown"></div>
+              </div>
+            </div>
             <div class="form-row">
               <div><label class="form-label" id="lbl-author-name">লেখকের নাম (বাংলা) <span class="req">*</span></label><input class="form-input" id="f-authorName" placeholder="যেমন: বিভূতিভূষণ বন্দ্যোপাধ্যায়"></div>
               <div><label class="form-label" id="lbl-author-en">লেখকের নাম (ইংরেজি)</label><input class="form-input" id="f-authorNameEn" placeholder="e.g. Bibhutibhushan Bandyopadhyay"></div>
@@ -1073,13 +1179,15 @@ try {
 }
 
 // ============== STATE ==============
-let books = JSON.parse(localStorage.getItem('books') || '[]');
+let books = JSON.parse(localStorage.getItem('_cache_books') || '[]');
 let currentMode = localStorage.getItem('currentMode') || 'critique';
 let charCount = 0, analysisCount = 0;
 let currentView = 'dashboard';
 let currentBookId = null;
 let editingBookId = null;
 let currentFilter = 'all';
+let currentTagFilter = '';
+let editingAuthorName = null;
 let cloudSyncStatus = 'idle'; // idle, syncing, synced, error, offline
 
 function setSyncStatus(status, msg){
@@ -1197,6 +1305,7 @@ async function syncFromCloud(){
 
 function setMode(mode) {
   currentMode = mode;
+  currentTagFilter = '';
   localStorage.setItem('currentMode', mode);
   
   // Style mode switcher buttons
@@ -1206,6 +1315,10 @@ function setMode(mode) {
     btnCritique.className = 'btn btn-sm btn-primary';
     btnEssay.className = 'btn btn-sm btn-ghost';
     $('brand-name-title').textContent = 'সাহিত্য সমালোচনা';
+    // Update nav editor label
+    if ($('nav-editor-label')) $('nav-editor-label').textContent = 'নতুন সমালোচনা';
+    if ($('action-editor-text')) $('action-editor-text').textContent = 'নতুন সমালোচনা যোগ করুন';
+    if ($('action-editor-sub')) $('action-editor-sub').textContent = 'সম্পূর্ণ গ্রন্থ সমালোচনা তৈরি করুন';
     $('lbl-book-info').textContent = 'উপন্যাসের তথ্য';
     $('lbl-book-name').innerHTML = 'উপন্যাসের নাম (বাংলা) <span class="req">*</span>';
     $('lbl-book-en').textContent = 'ইংরেজি নাম';
@@ -1221,11 +1334,18 @@ function setMode(mode) {
     $('form-sec-author').style.display = 'block';
     $('form-sec-chars').style.display = 'block';
     $('form-row-pub').style.display = 'grid';
+    $('form-row-pub').style.display = 'grid';
     $('form-row-epi').style.display = 'grid';
+    // Show author dropdown in critique mode
+    $('form-row-author-select').style.display = 'block';
   } else {
     btnCritique.className = 'btn btn-sm btn-ghost';
     btnEssay.className = 'btn btn-sm btn-primary';
     $('brand-name-title').textContent = 'প্রবন্ধ রচনা';
+    // Update nav editor label
+    if ($('nav-editor-label')) $('nav-editor-label').textContent = 'নতুন প্রবন্ধ';
+    if ($('action-editor-text')) $('action-editor-text').textContent = 'নতুন প্রবন্ধ যোগ করুন';
+    if ($('action-editor-sub')) $('action-editor-sub').textContent = 'নতুন প্রবন্ধ রচনা তৈরি করুন';
     $('lbl-book-info').textContent = 'প্রবন্ধের তথ্য';
     $('lbl-book-name').innerHTML = 'প্রবন্ধের শিরোনাম <span class="req">*</span>';
     $('lbl-book-en').textContent = 'বিষয়শ্রেণী / ট্যাগ';
@@ -1242,6 +1362,9 @@ function setMode(mode) {
     $('form-sec-chars').style.display = 'none';
     $('form-row-pub').style.display = 'none';
     $('form-row-epi').style.display = 'none';
+    // Hide author dropdown in essay mode
+    $('form-row-author-select').style.display = 'none';
+    resetAuthorSelect();
   }
   
   // Refresh standard states
@@ -1254,6 +1377,190 @@ function setMode(mode) {
 // ============== UTILS ==============
 function $(id){return document.getElementById(id)}
 function bn(n){const b=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];return String(n).replace(/[0-9]/g,d=>b[d])}
+
+// ============== AUTHOR DROPDOWN ==============
+function getUniqueAuthors(){
+  const map = {};
+  books.filter(b => (b.mode||'critique') === 'critique').forEach(b => {
+    const name = (b.authorName||'').trim();
+    if (!name) return;
+    if (!map[name]){
+      map[name] = {
+        authorName: name,
+        authorNameEn: b.authorNameEn || '',
+        authorDates: b.authorDates || '',
+        authorEdu: b.authorEdu || '',
+        authorAwards: b.authorAwards || '',
+        authorBio: b.authorBio || '',
+        books: []
+      };
+    }
+    map[name].books.push({ id: b.id, bookName: b.bookName, pubYear: b.pubYear });
+  });
+  return Object.values(map).sort((a,b) => a.authorName.localeCompare(b.authorName));
+}
+
+function toggleAuthorDropdown(){
+  const dd = $('author-dropdown');
+  if (!dd) return;
+  if (dd.classList.contains('open')){
+    dd.classList.remove('open');
+    return;
+  }
+  const authors = getUniqueAuthors();
+  let h = '';
+  authors.forEach(a => {
+    const initial = a.authorName.trim().charAt(0);
+    h += `<div class="author-dropdown-item" onclick="fillAuthor('${a.authorName.replace(/'/g,"\\'")}')">
+      <div class="author-dropdown-avatar">${initial}</div>
+      <div class="author-dropdown-info">
+        <div class="author-dropdown-name">${a.authorName}</div>
+        <div class="author-dropdown-sub">${a.authorNameEn || a.authorDates || 'বিস্তারিত দেখতে ক্লিক করুন'}</div>
+      </div>
+    </div>`;
+  });
+  h += `<div class="author-dropdown-new" onclick="closeAuthorDropdown()">
+    <svg class="icon"><use href="#i-plus"/></svg>
+    <span style="font-size:13px;font-weight:600;color:var(--accent);font-family:'Noto Sans Bengali',sans-serif">নতুন লেখক যোগ করুন</span>
+  </div>`;
+  dd.innerHTML = h;
+  dd.classList.add('open');
+}
+
+function closeAuthorDropdown(){
+  const dd = $('author-dropdown');
+  if (dd) dd.classList.remove('open');
+}
+
+function fillAuthor(name){
+  const authors = getUniqueAuthors();
+  const a = authors.find(x => x.authorName === name);
+  if (!a) return;
+  $('f-authorName').value = a.authorName;
+  $('f-authorNameEn').value = a.authorNameEn;
+  $('f-authorDates').value = a.authorDates;
+  $('f-authorEdu').value = a.authorEdu;
+  $('f-authorAwards').value = a.authorAwards;
+  $('f-authorBio').value = a.authorBio;
+  $('author-select-label').textContent = a.authorName;
+  $('author-select-label').style.color = 'var(--ink)';
+  closeAuthorDropdown();
+}
+
+function resetAuthorSelect(){
+  if ($('author-select-label')){
+    $('author-select-label').textContent = 'লেখক নির্বাচন করুন...';
+    $('author-select-label').style.color = 'var(--ink-lighter)';
+  }
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  const dd = $('author-dropdown');
+  if (dd && !e.target.closest('.author-dropdown-wrap')){
+    dd.classList.remove('open');
+  }
+});
+
+// ============== AUTHORS VIEW ==============
+function renderAuthorsView(){
+  const container = $('authors-container');
+  if (!container) return;
+  const authors = getUniqueAuthors();
+  $('nav-count-authors').textContent = bn(authors.length);
+  if (authors.length === 0){
+    container.innerHTML = `<div class="empty">
+      <div class="empty-icon"><svg class="icon icon-2xl"><use href="#i-users"/></svg></div>
+      <div class="empty-title">কোনো লেখক নেই</div>
+      <div class="empty-desc">গ্রন্থ সমালোচনা যোগ করলে লেখকদের তালিকা এখানে দেখা যাবে।</div>
+    </div>`;
+    return;
+  }
+  const colors = ['linear-gradient(135deg,#8B5E3C,#6B4828)','linear-gradient(135deg,#5C7A5E,#3F5641)','linear-gradient(135deg,#4A6D7C,#2F4955)','linear-gradient(135deg,#9E4A4A,#6F2E2E)','linear-gradient(135deg,#B8935A,#8B6E3C)','linear-gradient(135deg,#6B4F8B,#4A3563)'];
+  container.innerHTML = `<div class="authors-grid">` + authors.map((a, i) => {
+    const grad = colors[i % colors.length];
+    const initial = a.authorName.trim().charAt(0);
+    return `<div class="author-card">
+      <div class="author-card-top">
+        <div class="author-avatar" style="background:${grad}">${initial}</div>
+        <div>
+          <div class="author-card-name">${a.authorName}</div>
+          <div class="author-card-meta">${a.authorNameEn || a.authorDates || 'লেখক'}</div>
+        </div>
+      </div>
+      ${a.authorDates || a.authorEdu || a.authorAwards ? `<div class="author-card-body">
+        ${a.authorDates ? `<div class="author-detail-row"><span class="author-detail-label">সময়কাল</span><span class="author-detail-value">${a.authorDates}</span></div>` : ''}
+        ${a.authorEdu ? `<div class="author-detail-row"><span class="author-detail-label">শিক্ষা</span><span class="author-detail-value">${a.authorEdu}</span></div>` : ''}
+        ${a.authorAwards ? `<div class="author-detail-row"><span class="author-detail-label">পুরস্কার</span><span class="author-detail-value">${a.authorAwards}</span></div>` : ''}
+      </div>` : ''}
+      ${a.authorBio ? `<div class="author-card-body" style="border-top:1px solid var(--border-soft)">
+        <div class="author-detail-value" style="font-size:11px;line-height:1.7;max-height:60px;overflow:hidden;position:relative">
+          ${a.authorBio.split(/\n/).slice(0,2).join('<br>')}
+          ${a.authorBio.split(/\n/).length > 2 ? '<span style="color:var(--accent);font-weight:600"> আরও...</span>' : ''}
+        </div>
+      </div>` : ''}
+      <div style="padding:10px 18px;border-top:1px solid var(--border-soft);display:flex;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" style="gap:4px;font-size:11px;color:var(--accent)" onclick="editAuthor('${a.authorName.replace(/'/g,"\\'")}')">
+          <svg class="icon icon-sm"><use href="#i-edit"/></svg>
+          <span>সম্পাদনা</span>
+        </button>
+      </div>
+      <div class="author-book-list">
+        <div class="author-book-list-title">📖 রচনাবলি (${bn(a.books.length)}টি)</div>
+        ${a.books.map(b => `<div class="author-book-item" onclick="openBook(${b.id})">
+          <div class="author-book-dot"></div>
+          <span class="author-book-item-title">${b.bookName}</span>
+          ${b.pubYear ? `<span class="author-book-item-mode">${b.pubYear}</span>` : ''}
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+// ============== CHARACTERS VIEW ==============
+function renderCharactersView(){
+  const container = $('characters-container');
+  if (!container) return;
+  const critiqueBooks = books.filter(b => (b.mode||'critique') === 'critique' && b.chars && b.chars.length > 0);
+  let totalChars = 0;
+  critiqueBooks.forEach(b => totalChars += b.chars.length);
+  $('nav-count-chars').textContent = bn(totalChars);
+  if (critiqueBooks.length === 0){
+    container.innerHTML = `<div class="empty">
+      <div class="empty-icon"><svg class="icon icon-2xl"><use href="#i-user"/></svg></div>
+      <div class="empty-title">কোনো চরিত্র নেই</div>
+      <div class="empty-desc">গ্রন্থ সমালোচনায় চরিত্র যোগ করলে এখানে বই অনুযায়ী দেখা যাবে।</div>
+    </div>`;
+    return;
+  }
+  const colors = ['#8B5E3C','#5C7A5E','#4A6D7C','#9E4A4A','#B8935A','#6B4F8B','#7B1FA2','#C62828'];
+  container.innerHTML = critiqueBooks.map((b, bi) => {
+    const grad = colors[bi % colors.length];
+    const initial = b.bookName.trim().charAt(0);
+    return `<div class="char-book-group">
+      <div class="char-book-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <div class="char-book-cover" style="background:${grad}">${initial}</div>
+        <div style="flex:1;min-width:0">
+          <div class="char-book-title">${b.bookName}</div>
+          <div class="char-book-author">— ${b.authorName}</div>
+        </div>
+        <div class="char-book-badge">${bn(b.chars.length)}টি চরিত্র</div>
+      </div>
+      <div class="char-list">
+        ${b.chars.map(c => {
+          const ci = c.name.trim().charAt(0);
+          return `<div class="char-item">
+            <div class="char-avatar" style="background:${grad}">${ci}</div>
+            <div class="char-info">
+              <div class="char-name">${c.name}</div>
+              <div class="char-desc">${c.desc || ''}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
 
 function toast(msg, type=''){
   const t = $('toast');
@@ -1319,9 +1626,12 @@ async function removeFromCloud(id){
 }
 
 function refreshUI(){
-  $('nav-count-library').textContent = books.length;
+  const modeFiltered = books.filter(b => (b.mode||'critique') === currentMode);
+  $('nav-count-library').textContent = bn(modeFiltered.length);
   renderDashboard();
   renderLibrary();
+  renderAuthorsView();
+  renderCharactersView();
 }
 
 // ============== NAVIGATION ==============
@@ -1337,15 +1647,25 @@ function navigate(view, opts={}){
   // Topbar updates
   const titles = {
     dashboard: ['ড্যাশবোর্ড','আপনার সাহিত্য সংগ্রহের সারসংক্ষেপ'],
-    library:   ['গ্রন্থাগার','সমস্ত গ্রন্থ সমালোচনা'],
+    library:   currentMode === 'essay'
+      ? ['গ্রন্থাগার','সমস্ত প্রবন্ধ রচনা']
+      : ['গ্রন্থাগার','সমস্ত গ্রন্থ সমালোচনা'],
+    authors:   ['লেখক পরিচিত','সংরক্ষিত লেখকদের তালিকা ও বিবরণ'],
+    characters:['চরিত্র পরিচিতি','গ্রন্থ সমালোচনার সকল চরিত্র — বই অনুযায়ী সাজানো'],
     reader:    ['পাঠক','গ্রন্থ সমালোচনা পড়ুন'],
-    editor:    ['সম্পাদক', editingBookId ? 'সমালোচনা সম্পাদনা করুন' : 'নতুন সমালোচনা যোগ করুন'],
+    editor:    currentMode === 'essay'
+      ? ['সম্পাদক', editingBookId ? 'প্রবন্ধ সম্পাদনা করুন' : 'নতুন প্রবন্ধ যোগ করুন']
+      : ['সম্পাদক', editingBookId ? 'সমালোচনা সম্পাদনা করুন' : 'নতুন সমালোচনা যোগ করুন'],
     settings:  ['সেটিংস','অ্যাপ্লিকেশন কনফিগারেশন']
   };
   const t = titles[view] || ['','']; $('topbar-title').textContent = t[0]; $('topbar-sub').textContent = t[1];
 
-  // Show search only in library
-
+  // Refresh data for specific views
+  if (view === 'authors') renderAuthorsView();
+  if (view === 'library'){
+    renderLibrary();
+    closeTagDropdown();
+  }
 
   // Close mobile sidebar
   $('sidebar').classList.remove('open');
@@ -1359,20 +1679,49 @@ function toggleSidebar(){
 
 // ============== DASHBOARD ==============
 function renderDashboard(){
-  const totalBooks = books.length;
-  const authors = new Set(books.map(b => b.authorName)).size;
-  const totalChars = books.reduce((s,b) => s + (b.chars?.length||0), 0);
-  const totalChapters = books.reduce((s,b) => s + (b.analyses?.length||0), 0);
-  $('stat-books').textContent = bn(totalBooks);
-  $('stat-authors').textContent = bn(authors);
-  $('stat-chars').textContent = bn(totalChars);
-  $('stat-chapters').textContent = bn(totalChapters);
+  const modeBooks = books.filter(b => (b.mode||'critique') === currentMode);
+  const totalBooks = modeBooks.length;
+  const authors = new Set(modeBooks.map(b => b.authorName)).size;
+  const totalChars = modeBooks.reduce((s,b) => s + (b.chars?.length||0), 0);
+  const totalChapters = modeBooks.reduce((s,b) => s + (b.analyses?.length||0), 0);
+  const totalTags = new Set(modeBooks.map(b => (b.bookNameEn||'').trim()).filter(Boolean)).size;
 
-  // Recent list (last 5)
+  if (currentMode === 'essay'){
+    // Show only 2 stat cards for essay mode
+    $('stat-card-1').style.display = 'flex';
+    $('stat-card-2').style.display = 'flex';
+    $('stat-card-3').style.display = 'none';
+    $('stat-card-4').style.display = 'none';
+    // Update labels
+    $('stat-label-1').textContent = 'মোট প্রবন্ধ সংখ্যা';
+    $('stat-label-2').textContent = 'মোট বিষয়শ্রেণি/ট্যাগ';
+    // Update values
+    $('stat-books').textContent = bn(totalBooks);
+    $('stat-authors').textContent = bn(totalTags);
+  } else {
+    // Show 4 stat cards for critique mode
+    $('stat-card-1').style.display = 'flex';
+    $('stat-card-2').style.display = 'flex';
+    $('stat-card-3').style.display = 'flex';
+    $('stat-card-4').style.display = 'flex';
+    // Update labels
+    $('stat-label-1').textContent = 'মোট গ্রন্থ সমালোচনা';
+    $('stat-label-2').textContent = 'লেখকের সংখ্যা';
+    $('stat-label-3').textContent = 'মোট চরিত্র';
+    $('stat-label-4').textContent = 'সমালোচনা অধ্যায়';
+    // Update values
+    $('stat-books').textContent = bn(totalBooks);
+    $('stat-authors').textContent = bn(authors);
+    $('stat-chars').textContent = bn(totalChars);
+    $('stat-chapters').textContent = bn(totalChapters);
+  }
+
+  // Recent list (last 5) — mode filtered
   const list = $('recent-list');
-  const recent = [...books].reverse().slice(0,5);
+  const recent = [...modeBooks].reverse().slice(0,5);
   if (recent.length === 0){
-    list.innerHTML = `<div class="empty" style="padding:30px 20px"><div class="empty-desc">এখনো কোনো সমালোচনা যোগ করা হয়নি</div></div>`;
+    const emptyMsg = currentMode === 'essay' ? 'এখনো কোনো প্রবন্ধ যোগ করা হয়নি' : 'এখনো কোনো সমালোচনা যোগ করা হয়নি';
+    list.innerHTML = `<div class="empty" style="padding:30px 20px"><div class="empty-desc">${emptyMsg}</div></div>`;
     return;
   }
   list.innerHTML = recent.map((b, i) => {
@@ -1404,12 +1753,94 @@ function filterLibrary(){
   renderLibrary();
 }
 
+function toggleTagDropdown(){
+  const dd = $('tag-dropdown');
+  if (!dd) return;
+  dd.classList.toggle('open');
+  if (dd.classList.contains('open')){
+    const tagBtn = $('tag-filter-wrap');
+    if (tagBtn){
+      const rect = tagBtn.getBoundingClientRect();
+      dd.style.position = 'fixed';
+      dd.style.top = (rect.bottom + 6) + 'px';
+      dd.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
+      dd.style.minWidth = Math.max(rect.width, 200) + 'px';
+      dd.style.maxWidth = Math.min(rect.width, window.innerWidth - 32) + 'px';
+    }
+  }
+}
+
+function selectTag(tag){
+  currentTagFilter = tag;
+  closeTagDropdown();
+  renderLibrary();
+}
+
+function closeTagDropdown(){
+  const dd = $('tag-dropdown');
+  if (dd) dd.classList.remove('open');
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#tag-filter-wrap') && !e.target.closest('#tag-dropdown')){
+    closeTagDropdown();
+  }
+});
+
 function renderLibrary(){
   const grid = $('book-grid');
   const empty = $('library-empty');
   const search = ($('search-input').value || '').toLowerCase().trim();
 
-  let list = [...books];
+  // Show/hide tag filter based on mode
+  const tagWrap = $('tag-filter-wrap');
+  if (currentMode === 'essay'){
+    tagWrap.style.display = 'flex';
+    // Populate unique tags from essays (bookNameEn field stores tags)
+    const tags = new Set();
+    books.filter(b => (b.mode||'critique') === 'essay' && b.bookNameEn).forEach(b => {
+      b.bookNameEn.split(/[,，、]/).map(t => t.trim()).filter(Boolean).forEach(t => tags.add(t));
+    });
+    // Build dropdown menu
+    const dd = $('tag-dropdown');
+    const tagBtn = tagWrap;
+    let ddHTML = '';
+    [...tags].sort().forEach(t => {
+      ddHTML += `<div class="tag-dropdown-item${t===currentTagFilter?' active':''}" onclick="selectTag('${t.replace(/'/g,"\\'")}')">
+        <span class="tag-dot"></span>${t}
+      </div>`;
+    });
+    if (currentTagFilter){
+      ddHTML += `<div class="tag-dropdown-clear" onclick="selectTag('')">সব বিষয়শ্রেণি দেখুন</div>`;
+    }
+    dd.innerHTML = ddHTML || '<div class="tag-dropdown-clear">কোনো বিষয়শ্রেণি নেই</div>';
+    // Position dropdown right below the tag chip (fixed for scroll)
+    if (dd && tagBtn){
+      const rect = tagBtn.getBoundingClientRect();
+      dd.style.position = 'fixed';
+      dd.style.top = (rect.bottom + 6) + 'px';
+      dd.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
+      dd.style.minWidth = Math.max(rect.width, 200) + 'px';
+    }
+    // Update button state
+    tagWrap.classList.toggle('active', !!currentTagFilter);
+    $('tag-filter-label').textContent = currentTagFilter || 'বিষয়শ্রেণি';
+  } else {
+    tagWrap.style.display = 'none';
+    currentTagFilter = '';
+    closeTagDropdown();
+  }
+
+  // Filter by current mode (critique or essay)
+  let list = books.filter(b => (b.mode||'critique') === currentMode);
+
+  // Filter by tag (essay mode only)
+  if (currentTagFilter){
+    list = list.filter(b => {
+      if (!b.bookNameEn) return false;
+      return b.bookNameEn.split(/[,，、]/).map(t => t.trim()).includes(currentTagFilter);
+    });
+  }
 
   // Search
   if (search){
@@ -1420,11 +1851,11 @@ function renderLibrary(){
     );
   }
 
-  // Filter
+  // Sort
   if (currentFilter === 'recent') list.reverse();
   else if (currentFilter === 'alpha') list.sort((a,b) => (a.bookName||'').localeCompare(b.bookName||''));
 
-  if (books.length === 0){
+  if (list.length === 0){
     empty.style.display = 'block';
     grid.innerHTML = '';
     return;
@@ -1469,10 +1900,11 @@ function renderLibrary(){
     </div>`;
   }).join('');
 
-  // Add new card
+  // Add new card (mode-aware text)
+  const addText = currentMode === 'essay' ? 'নতুন প্রবন্ধ রচনা' : 'নতুন সমালোচনা';
   html += `<div class="book-grid-add" onclick="navigate('editor');resetForm()">
     <div class="book-grid-add-icon"><svg class="icon icon-lg"><use href="#i-plus"/></svg></div>
-    <div class="book-grid-add-text">নতুন সমালোচনা</div>
+    <div class="book-grid-add-text">${addText}</div>
   </div>`;
 
   grid.innerHTML = html;
@@ -1583,8 +2015,23 @@ function resetForm(){
   addCharField(); addCharField();
   addAnalysisField(); addAnalysisField();
   editingBookId = null;
+  editingAuthorName = null;
+  resetAuthorSelect();
+  // Restore form visibility
+  $('form-sec-book').style.display = 'block';
+  $('form-sec-author').style.display = currentMode === 'essay' ? 'none' : 'block';
+  $('form-sec-chars').style.display = currentMode === 'essay' ? 'none' : 'block';
+  $('form-sec-analysis').style.display = 'block';
+  $('form-sec-summary').style.display = 'block';
+  $('form-row-author-select').style.display = currentMode === 'essay' ? 'none' : 'block';
+  $('form-row-pub').style.display = currentMode === 'essay' ? 'none' : 'grid';
+  $('form-row-epi').style.display = currentMode === 'essay' ? 'none' : 'grid';
   $('editor-title').textContent = currentMode === 'essay' ? 'নতুন প্রবন্ধ রচনা' : 'নতুন গ্রন্থ সমালোচনা';
   $('save-btn-text').textContent = 'সংরক্ষণ করুন';
+  // Update sidebar nav and dashboard labels
+  if ($('nav-editor-label')) $('nav-editor-label').textContent = currentMode === 'essay' ? 'নতুন প্রবন্ধ' : 'নতুন সমালোচনা';
+  if ($('action-editor-text')) $('action-editor-text').textContent = currentMode === 'essay' ? 'নতুন প্রবন্ধ যোগ করুন' : 'নতুন সমালোচনা যোগ করুন';
+  if ($('action-editor-sub')) $('action-editor-sub').textContent = currentMode === 'essay' ? 'নতুন প্রবন্ধ রচনা তৈরি করুন' : 'সম্পূর্ণ গ্রন্থ সমালোচনা তৈরি করুন';
 }
 
 function editBook(id, ev){
@@ -1600,7 +2047,17 @@ function deleteBookById(id, ev){
 function editCurrentBook(){
   const b = books.find(x => x.id === currentBookId);
   if (!b) return;
+  editingAuthorName = null;
   setMode(b.mode || 'critique');
+  // Restore form visibility
+  $('form-sec-book').style.display = 'block';
+  $('form-sec-author').style.display = 'block';
+  $('form-sec-chars').style.display = 'block';
+  $('form-sec-analysis').style.display = 'block';
+  $('form-sec-summary').style.display = 'block';
+  $('form-row-author-select').style.display = 'block';
+  $('form-row-pub').style.display = 'grid';
+  $('form-row-epi').style.display = 'grid';
   editingBookId = b.id;
   $('f-id').value = b.id;
   $('f-bookName').value = b.bookName || '';
@@ -1615,6 +2072,10 @@ function editCurrentBook(){
   $('f-authorAwards').value = b.authorAwards || '';
   $('f-authorBio').value = b.authorBio || '';
   $('f-summary').value = b.summary || '';
+  if (b.authorName && $('author-select-label')){
+    $('author-select-label').textContent = b.authorName;
+    $('author-select-label').style.color = 'var(--ink)';
+  }
   $('chars-container').innerHTML = '';
   $('analysis-container').innerHTML = '';
   charCount = 0; analysisCount = 0;
@@ -1624,6 +2085,33 @@ function editCurrentBook(){
   if (analysisCount === 0) addAnalysisField();
   $('editor-title').textContent = 'সম্পাদনা: ' + b.bookName;
   $('save-btn-text').textContent = 'আপডেট করুন';
+  navigate('editor');
+}
+
+function editAuthor(name){
+  const authors = getUniqueAuthors();
+  const a = authors.find(x => x.authorName === name);
+  if (!a) return;
+  editingAuthorName = name;
+  editingBookId = null;
+  // Hide book sections, show only author section
+  $('form-sec-book').style.display = 'none';
+  $('form-sec-chars').style.display = 'none';
+  $('form-sec-analysis').style.display = 'none';
+  $('form-sec-summary').style.display = 'none';
+  $('form-sec-author').style.display = 'block';
+  $('form-row-author-select').style.display = 'none';
+  // Clear book fields
+  ['f-id','f-bookName','f-bookNameEn','f-pubYear','f-publisher','f-epigraph','f-summary'].forEach(id => $(id).value = '');
+  // Fill author fields
+  $('f-authorName').value = a.authorName;
+  $('f-authorNameEn').value = a.authorNameEn;
+  $('f-authorDates').value = a.authorDates;
+  $('f-authorEdu').value = a.authorEdu;
+  $('f-authorAwards').value = a.authorAwards;
+  $('f-authorBio').value = a.authorBio;
+  $('editor-title').textContent = 'লেখক সম্পাদনা: ' + a.authorName;
+  $('save-btn-text').textContent = 'লেখক আপডেট করুন';
   navigate('editor');
 }
 
@@ -1637,6 +2125,40 @@ async function deleteCurrentBook(){
 }
 
 async function saveBook(){
+  // EDITING AUTHOR — only validate author fields
+  if (editingAuthorName){
+    const authorName = $('f-authorName').value.trim();
+    if (!authorName){
+      toast('লেখকের নাম আবশ্যক', 'error');
+      return;
+    }
+    const oldName = editingAuthorName;
+    let updateCount = 0;
+    for (let i = 0; i < books.length; i++){
+      const b = books[i];
+      if ((b.authorName || '').trim() === oldName){
+        b.authorName = authorName;
+        b.authorNameEn = $('f-authorNameEn').value.trim();
+        b.authorDates = $('f-authorDates').value.trim();
+        b.authorEdu = $('f-authorEdu').value.trim();
+        b.authorAwards = $('f-authorAwards').value.trim();
+        b.authorBio = $('f-authorBio').value.trim();
+        await save(b);
+        updateCount++;
+      }
+    }
+    editingAuthorName = null;
+    // Restore form visibility
+    $('form-sec-book').style.display = 'block';
+    $('form-sec-chars').style.display = 'block';
+    $('form-sec-analysis').style.display = 'block';
+    $('form-sec-summary').style.display = 'block';
+    $('form-row-author-select').style.display = 'block';
+    toast(bn(updateCount) + 'টি বইয়ের লেখক আপডেট হয়েছে', 'success');
+    navigate('authors');
+    return;
+  }
+
   const bookName = $('f-bookName').value.trim();
   const authorName = currentMode === 'essay'
     ? ($('f-authorName').value.trim() || 'প্রাবন্ধিক')
@@ -1681,14 +2203,17 @@ async function saveBook(){
     chars, analyses
   };
 
-  // Save to Supabase
-  await save(data);
-  editingBookId = null;
+  // Normal book save
   if (editingBookId){
+    const idx = books.findIndex(x => x.id === editingBookId);
+    if (idx > -1) books[idx] = data;
     toast('"' + bookName + '" আপডেট হয়েছে', 'success');
   } else {
+    books.push(data);
     toast('"' + bookName + '" যোগ করা হয়েছে', 'success');
   }
+  await save(data);
+  editingBookId = null;
   openBook(data.id);
 }
 
@@ -1837,7 +2362,7 @@ function exportPDF(){
   .section-title-light{font-size:11.5pt;font-weight:400;color:#8A7E75;margin-top:3px}
   .section-divider{width:70px;height:2px;background:linear-gradient(90deg,transparent,#8B5E3C,transparent);margin:10px auto 0}
   h2{font-size:14.5pt;font-weight:700;color:#2C2420;margin-top:24px;margin-bottom:12px;padding-bottom:5px;border-bottom:1px solid #E8D5B0;line-height:1.5}
-  p{font-size:10.5pt;text-align:justify;margin-bottom:10px;line-height:1.9;text-indent:2em;hyphens:auto}
+  p{font-size:10.5pt;text-align:justify;margin-bottom:10px;line-height:1.9;text-indent:0}
   p.no-indent{text-indent:0}
   .drop-cap::first-letter{font-size:3em;float:left;line-height:.78;margin:3px 7px 0 0;color:#8B5E3C;font-weight:700}
   blockquote{margin:14px 0;padding:12px 18px;border-left:3px solid #8B5E3C;background:rgba(139,94,60,.04);border-radius:0 6px 6px 0;font-style:italic}
@@ -1890,9 +2415,15 @@ function exportPDF(){
   <div class="cover-sub">সমালোচনা, বিশ্লেষণ ও পাঠচিন্তা</div>
   <div class="cover-orn"></div>
   <div class="cover-count">রচনাসংখ্যা: ${bn(total)}টি</div>
-  <div style="margin-top:14px;display:flex;gap:20px;justify-content:center;font-size:9pt;color:rgba(240,230,214,.5);">
-    <span>📖 গ্রন্থ সমালোচনা: ${bn(critiques.length)}টি</span>
-    <span>📝 প্রবন্ধ: ${bn(essays.length)}টি</span>
+  <div style="margin-top:14px;display:flex;gap:24px;justify-content:center;font-size:9pt;color:rgba(240,230,214,.5);">
+    <span style="display:flex;align-items:center;gap:6px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      গ্রন্থ সমালোচনা: ${bn(critiques.length)}টি
+    </span>
+    <span style="display:flex;align-items:center;gap:6px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+      প্রবন্ধ: ${bn(essays.length)}টি
+    </span>
   </div>
   <div class="cover-orn"></div>
   <div class="cover-tagline">মার্কসবাদী · নারীবাদী · উপনিবেশ-পরবর্তী · সমাজবিজ্ঞানিক · দার্শনিক · অর্থনৈতিক</div>
