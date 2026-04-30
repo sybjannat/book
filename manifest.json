@@ -1,0 +1,52 @@
+{
+  "name": "বাংলা সাহিত্য সমালোচনা ও প্রবন্ধ",
+  "short_name": "সাহিত্য সমালোচনা",
+  "description": "বাংলা সাহিত্যের গ্রন্থ সমালোচনা ও প্রবন্ধ রচনা অ্যাপ — মার্কসবাদী, নারীবাদী, দার্শনিক ও অর্থনৈতিক দৃষ্টিকোণ থেকে",
+  "lang": "bn",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1F1B17",
+  "background_color": "#FAF7F2",
+  "categories": ["education", "books", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "নতুন সমালোচনা",
+      "short_name": "সমালোচনা",
+      "description": "নতুন গ্রন্থ সমালোচনা যোগ করুন",
+      "url": "/?action=editor&mode=critique",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "নতুন প্রবন্ধ",
+      "short_name": "প্রবন্ধ",
+      "description": "নতুন প্রবন্ধ রচনা যোগ করুন",
+      "url": "/?action=editor&mode=essay",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "গ্রন্থাগার",
+      "short_name": "লাইব্রেরি",
+      "description": "সব সমালোচনা ও প্রবন্ধ দেখুন",
+      "url": "/?action=library",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
