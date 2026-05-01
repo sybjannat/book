@@ -2129,16 +2129,7 @@ function renderBookHTML(b){
 }
 
 function parseRichText(text, a = null){
-  // Build dynamic tables map: index 1, 2, 3 ... from a.tables array or fallback to a.tableData
-  const tablesMap = {};
-  if (a && a.type === 'table') {
-    const tables = (a.tables && a.tables.length) ? a.tables : [{tableNum:1, tableData: a.tableData||'', caption: a.tableCaption||''}];
-    tables.forEach((t, i) => {
-      if (t.tableData) tablesMap[i+1] = renderTableHTML(t.tableData, t.caption||'');
-    });
-  }
-  const tableHTML1 = tablesMap[1] || '';
-  const tableHTML2 = tablesMap[2] || '';
+  const tableHTML = (a && a.type === 'table' && a.tableData) ? renderTableHTML(a.tableData, a.tableCaption || '') : '';
   const imageHTML = (a && a.type === 'image' && (a.imgData || a.imgUrl)) ? `<div class="analysis-img-block"><div class="analysis-img-wrap"><img src="${a.imgUrl || a.imgData}" alt="${a.imgCaption||''}" loading="lazy"></div>${a.imgCaption ? `<div class="analysis-img-caption">${a.imgCaption}</div>` : ''}</div>` : '';
   
   // If the user leaves the paragraph blank but selected table/image, still show it.
@@ -2175,7 +2166,7 @@ function parseRichText(text, a = null){
   let inOl = false;
   let olType = '1';
   
-  const renderedTables = {};
+  let renderedTable = false;
   let renderedImage = false;
 
   for (let i = 0; i < lines.length; i++){
@@ -2195,18 +2186,13 @@ function parseRichText(text, a = null){
       continue;
     }
     
-    // Check for table insertion markers (#T, #T1, #T2 ... #Tn)
-    const tMatch = line.match(/^#T(\d*)$/i);
-    if (tMatch) {
-      const tNum = tMatch[1] ? parseInt(tMatch[1]) : 1;
-      const tHTML = tablesMap[tNum];
-      if (tHTML) {
-        if (inUl) { html += '</ul>'; inUl = false; }
-        if (inOl) { html += '</ol>'; inOl = false; }
-        html += tHTML;
-        renderedTables[tNum] = true;
-        continue;
-      }
+    // Check for table insertion markers (#T, #T1)
+    if ((line === '#T' || line === '#T1') && tableHTML) {
+      if (inUl) { html += '</ul>'; inUl = false; }
+      if (inOl) { html += '</ol>'; inOl = false; }
+      html += tableHTML;
+      renderedTable = true;
+      continue;
     }
     
     // Check for picture insertion marker (#P)
@@ -2248,22 +2234,12 @@ function parseRichText(text, a = null){
     if (inUl) { html += '</ul>'; inUl = false; }
     if (inOl) { html += '</ol>'; inOl = false; }
     
-    // Check for inline #T1 or #T markers in line
     let parsedLine = parseRichTextInline(line);
-    Object.keys(tablesMap).forEach(k => {
-      const kn = parseInt(k);
-      const marker = kn === 1 ? '#T1' : `#T${kn}`;
-      if (parsedLine.includes(marker)) {
-        parsedLine = parsedLine.replace(marker, tablesMap[k]);
-        renderedTables[kn] = true;
-      }
-    });
-    // Support generic #T as table 1
-    if (parsedLine.includes('#T') && tablesMap[1] && !renderedTables[1]) {
-      parsedLine = parsedLine.replace('#T', tablesMap[1]);
-      renderedTables[1] = true;
+    if (tableHTML && !renderedTable && parsedLine.includes('#T')) {
+      parsedLine = parsedLine.replace('#T', tableHTML);
+      renderedTable = true;
     }
-    if (parsedLine.includes('#P') && imageHTML && !renderedImage) {
+    if (imageHTML && !renderedImage && parsedLine.includes('#P')) {
       parsedLine = parsedLine.replace('#P', imageHTML);
       renderedImage = true;
     }
@@ -2274,12 +2250,7 @@ function parseRichText(text, a = null){
   if (inUl) html += '</ul>';
   if (inOl) html += '</ol>';
   
-  // Append any unused tables (fallback if no #T markers in body)
-  Object.keys(tablesMap).forEach(k => {
-    const kn = parseInt(k);
-    if (renderedTables[kn]) return;
-    html += tablesMap[k];
-  });
+  if (tableHTML && !renderedTable) html += tableHTML;
   if (imageHTML && !renderedImage) html = imageHTML + html;
   
   return html;
@@ -2420,15 +2391,14 @@ function rebuildDynTable(blockId, rows, cols, existing) {
   save();
 }
 
-function rebuildEditableTable(n, tableNum = 1) {
-  const containerId = tableNum === 1 ? `editable-table-${n}` : `editable-table-${n}-${tableNum}`;
-  const container = $(containerId);
+function rebuildEditableTable(n) {
+  const container = $('editable-table-' + n);
   const wrap = document.getElementById('analysis-' + n);
   if (!container || !wrap) return;
 
-  const rowsClass = tableNum === 1 ? '.analysis-table-rows' : `.analysis-table-rows-${tableNum}`;
-  const colsClass = tableNum === 1 ? '.analysis-table-cols' : `.analysis-table-cols-${tableNum}`;
-  const dataClass = tableNum === 1 ? '.analysis-table-data' : `.analysis-table-data-${tableNum}`;
+  const rowsClass = '.analysis-table-rows';
+  const colsClass = '.analysis-table-cols';
+  const dataClass = '.analysis-table-data';
 
   const rows = parseInt(wrap.querySelector(rowsClass)?.value) || 3;
   const cols = parseInt(wrap.querySelector(colsClass)?.value) || 3;
@@ -2522,25 +2492,23 @@ function addAnalysisField(data={}){
       </div></div>
     </div>
     <div id="analysis-table-wrap-${n}" style="display:${hasTable?'block':'none'}">
-      <div id="analysis-tables-container-${n}"></div>
-      <button type="button" class="add-repeat" style="margin-top:12px;width:100%;justify-content:center" onclick="addTableToAnalysis(${n})">
-        <svg class="icon"><use href="#i-plus"/></svg> আরও একটি ছক যোগ করুন
-      </button>
+      <div class="form-row">
+        <div><label class="form-label">সারি সংখ্যা (Rows)</label><input type="number" class="form-input analysis-table-rows" value="${data.tableRows||3}" min="2" max="20" onchange="rebuildEditableTable(${n})"></div>
+        <div><label class="form-label">কলাম সংখ্যা (Columns)</label><input type="number" class="form-input analysis-table-cols" value="${data.tableCols||3}" min="2" max="8" onchange="rebuildEditableTable(${n})"></div>
+      </div>
+      <div class="form-row full">
+        <div><label class="form-label">ছকের শিরোনাম / ক্যাপশন (ঐচ্ছিক)</label><input class="form-input analysis-table-caption" placeholder="যেমন: ছক ১: তুলনামূলক বিশ্লেষণ" value="${data.tableCaption||''}"></div>
+      </div>
+      <div class="form-row full">
+        <label class="form-label" style="margin-bottom:4px">সরাসরি টেবিলে লিখুন</label>
+        <input type="hidden" class="analysis-table-data" value="${(data.tableData||'').replace(/\"/g,'&quot;')}">
+        <div class="editable-table-container" id="editable-table-${n}" style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;background:#fff"></div>
+      </div>
     </div>`;
   $('analysis-container').appendChild(a);
   if (data.type) a.querySelector('.analysis-type-input').value = data.type;
-  // Build tables after DOM insertion
-  if (hasTable) {
-    setTimeout(() => {
-      const existingTables = data.tables || [];
-      if (existingTables.length === 0) {
-        // First time: add a default table 1
-        addTableToAnalysis(n, {tableNum: 1, rows: data.tableRows||3, cols: data.tableCols||3, caption: data.tableCaption||'', tableData: data.tableData||''});
-      } else {
-        existingTables.forEach((t, ti) => addTableToAnalysis(n, t));
-      }
-    }, 50);
-  }
+  // Rebuild editable table after DOM insertion
+  if (hasTable) setTimeout(() => rebuildEditableTable(n), 50);
 }
 
 function toggleAnalysisFields(sel, n){
@@ -2818,25 +2786,11 @@ async function saveBook(){
       if (!item.imgData && !item.imgUrl && !item.body) return;
     }
     if (type === 'table'){
-      // Collect all dynamic tables
-      const tableBlocks = g.querySelectorAll('.analysis-table-block');
-      const tables = [];
-      tableBlocks.forEach((block, i) => {
-        const tableNum = i + 1;
-        const tableData = (block.querySelector('.tbl-data')?.value || '').trim();
-        const rows = block.querySelector('.tbl-rows')?.value || '3';
-        const cols = block.querySelector('.tbl-cols')?.value || '3';
-        const caption = (block.querySelector('.tbl-caption')?.value || '').trim();
-        if (tableData) tables.push({ tableNum, rows, cols, caption, tableData });
-      });
-      item.tables = tables;
-      // Backward compatibility: first table also stored at root
-      if (tables.length > 0) {
-        item.tableData = tables[0].tableData;
-        item.tableCaption = tables[0].caption;
-        item.tableRows = tables[0].rows;
-        item.tableCols = tables[0].cols;
-      }
+      item.tableRows = g.querySelector('.analysis-table-rows')?.value || '3';
+      item.tableCols = g.querySelector('.analysis-table-cols')?.value || '3';
+      item.tableData = (g.querySelector('.analysis-table-data')?.value || '').trim();
+      item.tableCaption = (g.querySelector('.analysis-table-caption')?.value || '').trim();
+      if (!item.tableData) return;
     }
     analyses.push(item);
   });
