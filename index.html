@@ -2114,12 +2114,45 @@ function parseRichText(text, a = null){
   let renderedTable = false;
   let renderedImage = false;
 
-  for (let i = 0; i < lines.length; i++){
-    let line = lines[i].trim();
+  // Regex for multi-line blocks
+  // #Q ... #Q (Left aligned quote)
+  // #QM ... #QM (Middle aligned quote)
+  const quoteBlockRegex = /#Q(M)?([\s\S]*?)#QM?/g;
+  let processedText = text;
+  let quoteIndex = 0;
+  const quotePlaceholders = [];
+  
+  processedText = processedText.replace(quoteBlockRegex, (match, isMiddle, content) => {
+    const placeholder = `__QUOTE_${quoteIndex}__`;
+    const alignClass = isMiddle ? 'quote-middle' : 'quote-left';
+    quotePlaceholders.push({ 
+      placeholder: placeholder, 
+      content: `<blockquote class="rich-quote ${alignClass}"><div class="rich-quote-text">${parseRichTextInline(content.trim())}</div></blockquote>` 
+    });
+    quoteIndex++;
+    return placeholder;
+  });
+
+  // Split into lines for list/table processing
+  const finalLines = processedText.split('\n');
+
+  for (let i = 0; i < finalLines.length; i++){
+    let line = finalLines[i].trim();
     if (!line) {
       // Empty line closes lists and adds space
       if (inUl) { html += '</ul>'; inUl = false; }
       if (inOl) { html += '</ol>'; inOl = false; }
+      continue;
+    }
+    
+    // Check for quote placeholders
+    if (line.startsWith('__QUOTE_')) {
+      if (inUl) { html += '</ul>'; inUl = false; }
+      if (inOl) { html += '</ol>'; inOl = false; }
+      const placeholderData = quotePlaceholders.find(p => line.includes(p.placeholder));
+      if (placeholderData) {
+        html += placeholderData.content;
+      }
       continue;
     }
     
@@ -2138,15 +2171,6 @@ function parseRichText(text, a = null){
       if (inOl) { html += '</ol>'; inOl = false; }
       html += imageHTML;
       renderedImage = true;
-      continue;
-    }
-    
-    // Check for quote marker (#Q text...)
-    const qMatch = line.match(/^#Q\s+(.+)/);
-    if (qMatch){
-      if (inUl) { html += '</ul>'; inUl = false; }
-      if (inOl) { html += '</ol>'; inOl = false; }
-      html += `<blockquote class="rich-quote">${parseRichTextInline(qMatch[1])}</blockquote>`;
       continue;
     }
     
@@ -2175,7 +2199,7 @@ function parseRichText(text, a = null){
       html += `<li>${parseRichTextInline(content)}</li>`;
       continue;
     }
-    
+
     // Regular paragraph - close any open lists
     if (inUl) { html += '</ul>'; inUl = false; }
     if (inOl) { html += '</ol>'; inOl = false; }
