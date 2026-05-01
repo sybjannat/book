@@ -395,6 +395,29 @@
   .page p{font-size:10.5pt;text-align:justify;margin-bottom:10px;line-height:1.9;text-indent:0}
   .page p.no-indent{text-indent:0}
   .drop-cap::first-letter{font-size:3em;float:left;line-height:.78;margin:3px 7px 0 0;color:var(--accent);font-weight:700}
+  
+  /* RICH TEXT LISTS */
+  .rich-list{margin:12px 0 12px 28px;padding:0}
+  .rich-list li{font-size:10.5pt;line-height:1.9;color:var(--ink);margin-bottom:6px;padding-left:6px}
+  .rich-list ul, .rich-list ol{margin-top:6px;margin-bottom:6px}
+  .rich-list[data-type="bn"]{list-style-type:bengali}
+  .rich-list[data-type="1"]{list-style-type:decimal}
+  
+  /* RICH QUOTE */
+  .rich-quote{
+    position:relative;margin:20px 0;padding:24px 30px 22px 50px;
+    background:linear-gradient(135deg,rgba(184,147,90,.08),rgba(139,94,60,.04));
+    border-left:4px solid var(--accent);border-radius:0 12px 12px 0;
+    font-family:'Noto Serif Bengali',serif;font-style:italic;
+    font-size:11pt;line-height:1.85;color:var(--ink-light);
+    box-shadow:0 2px 12px rgba(139,94,60,.06);
+  }
+  .rich-quote::before{
+    content:'"';position:absolute;left:14px;top:-6px;
+    font-family:Georgia,serif;font-size:42pt;color:var(--accent);
+    line-height:1;opacity:.5;font-style:normal;
+  }
+  
   .page blockquote{margin:14px 0;padding:12px 18px;border-left:3px solid var(--accent);background:rgba(139,94,60,.04);border-radius:0 6px 6px 0;font-style:italic}
   .page blockquote p{text-indent:0;font-size:10pt;color:#5A4E45}
   .char-card{background:rgba(255,255,255,.6);border:1px solid #E8D5B0;border-radius:7px;padding:14px 18px;margin:12px 0;position:relative}
@@ -414,6 +437,47 @@
   .analysis-box.blue-box .analysis-box-title{color:var(--blue)}
   .analysis-box.red-box{background:rgba(158,74,74,.06);border-color:rgba(158,74,74,.2)}
   .analysis-box.red-box .analysis-box-title{color:var(--red)}
+
+  /* IMAGE BLOCK */
+  .analysis-img-block { margin: 24px 0; clear: both; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .analysis-img-wrap { 
+    margin: 0 auto;
+    max-width: 80%; border-radius: 12px; 
+    border: 1px solid var(--border); overflow: hidden;
+    background: #fff; line-height: 0;
+    box-shadow: var(--shadow);
+  }
+  .analysis-img-wrap img { width: 100%; height: auto; object-fit: contain; max-height: 400px; }
+  .analysis-img-caption { 
+    font-size: 9.5pt; color: var(--ink-lighter); font-style: italic; 
+    text-align: center; margin-top: 10px; padding: 0 12px;
+    line-height: 1.5; font-family: 'Noto Sans Bengali', sans-serif;
+  }
+  @media (max-width: 600px) {
+    .analysis-img-wrap { max-width: 100%; }
+  }
+
+  /* MODERN TABLE */
+  .analysis-table-wrap { margin: 20px 0; overflow: visible; width: 100%; }
+  .analysis-table-caption { font-size: 10.5pt; font-weight: 600; color: var(--accent); text-align: left; padding: 0 4px 10px; font-family: 'Noto Sans Bengali', sans-serif; line-height: 1.5; }
+  .analysis-table-box { width: 100%; overflow: hidden; border-radius: 10px; border: 1.5px solid #ddd; background: #fff; }
+  .analysis-table { width: 100%; border-collapse: collapse; font-family: 'Noto Sans Bengali', sans-serif; font-size: 10pt; }
+  .analysis-table thead th {
+    padding: 12px 15px; text-align: left; font-weight: 700; font-size: 10pt; color: #fff;
+    border-bottom: 2.5px solid rgba(0,0,0,.1);
+  }
+  .analysis-table thead tr { background: linear-gradient(135deg, #4A6D7C, #3B5A69); }
+  .analysis-table tbody tr:nth-child(odd) { background: #F8FAFB; }
+  .analysis-table tbody tr:nth-child(even) { background: #EBF3F7; }
+  .analysis-table tbody tr:hover { background: #DEEAF1; }
+  .analysis-table td { padding: 11px 15px; border-bottom: 1px solid #E0EBF0; color: #334155; }
+  .analysis-table tr:last-child td { border-bottom: none; }
+  .analysis-table tbody tr:last-child td { border-bottom: none; }
+  .analysis-table th { border-right: 1px solid rgba(255,255,255,.15); }
+  .analysis-table th:last-child { border-right: none; }
+  .analysis-table td { border-right: 1px solid #E0EBF0; }
+  .analysis-table td:last-child { border-right: none; }
+
   .epigraph{text-align:center;margin:24px 0;padding:16px 28px;font-style:italic;color:#5A4E45}
   .epigraph::before,.epigraph::after{content:'';display:block;width:24px;height:6px;margin:8px auto;background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:50%;opacity:.7}
   .epigraph-text{font-size:11pt;line-height:1.9}
@@ -574,6 +638,16 @@
   .toast.success{background:#2D5F3F}
   .toast.error{background:#7A2424}
 
+  /* ===== PWA SPLASH SCREEN ===== */
+  #splash-screen {
+    opacity: 1;
+    transition: opacity 0.25s ease-out;
+  }
+  #splash-screen.hide {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   /* ===== MOBILE & DEVICE RESPONSIVE ===== */
   @media (max-width:768px){
     :root{--sidebar-w:0px; --page-w:100%; --mt:10mm; --mb:10mm; --ml:12mm; --mr:10mm;}
@@ -609,6 +683,8 @@
     #reader-pages{padding:0}
     #reader-pages .page{width:100%;padding:4mm 4mm 3mm 4mm;min-height:auto;margin:0 auto;border-radius:0;box-shadow:none}
     #reader-pages{padding:0}
+    .running-title{display:none}
+    .section-header{padding-top:8px}
     .page h2{font-size:13pt;margin-top:18px}
     .page p{font-size:10pt;line-height:1.8;text-indent:0;margin-bottom:8px}
     .page blockquote{padding:10px 14px;margin:10px 0}
@@ -665,6 +741,14 @@
 </style>
 </head>
 <body class="bn">
+
+<!-- PWA LOADING SPLASH SCREEN -->
+<div id="splash-screen" style="position:fixed;inset:0;z-index:99999;background:var(--bg,#FAF7F2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;transition:opacity .25s ease-out;">
+  <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#8B5E3C,#6B4828);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 20px rgba(139,94,60,.3)">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+  </div>
+  <div style="font-size:13px;color:var(--ink-lighter);font-weight:600;letter-spacing:1.5px;font-family:'Noto Sans Bengali',sans-serif">সাহিত্য সমালোচনা</div>
+</div>
 
 <!-- ==================== SVG ICON SPRITE ==================== -->
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
@@ -1019,17 +1103,17 @@
               </div>
             </div>
             <div class="form-row">
-              <div><label class="form-label" id="lbl-author-name">লেখকের নাম (বাংলা) <span class="req">*</span></label><input class="form-input" id="f-authorName" placeholder="যেমন: বিভূতিভূষণ বন্দ্যোপাধ্যায়"></div>
-              <div><label class="form-label" id="lbl-author-en">লেখকের নাম (ইংরেজি)</label><input class="form-input" id="f-authorNameEn" placeholder="e.g. Bibhutibhushan Bandyopadhyay"></div>
+              <div id="form-col-author-bn" style="grid-column: span 1"><label class="form-label" id="lbl-author-name">লেখকের নাম (বাংলা) <span class="req">*</span></label><input class="form-input" id="f-authorName" placeholder="যেমন: বিভূতিভূষণ বন্দ্যোপাধ্যায়"></div>
+              <div id="form-col-author-en"><label class="form-label" id="lbl-author-en">লেখকের নাম (ইংরেজি)</label><input class="form-input" id="f-authorNameEn" placeholder="e.g. Bibhutibhushan Bandyopadhyay"></div>
             </div>
-            <div class="form-row">
+            <div class="form-row" id="form-row-author-dates">
               <div><label class="form-label">জন্ম-মৃত্যু</label><input class="form-input" id="f-authorDates" placeholder="১৮৯৪ — ১৯৫০"></div>
               <div><label class="form-label">শিক্ষা</label><input class="form-input" id="f-authorEdu" placeholder="বি.এ., রিপন কলেজ"></div>
             </div>
-            <div class="form-row full">
+            <div class="form-row full" id="form-row-author-awards">
               <div><label class="form-label">পুরস্কার ও স্বীকৃতি</label><input class="form-input" id="f-authorAwards" placeholder="যেমন: রবীন্দ্র পুরস্কার"></div>
             </div>
-            <div class="form-row full">
+            <div class="form-row full" id="form-row-author-bio">
               <div><label class="form-label">লেখকের বিস্তারিত পরিচিতি <span class="req">*</span></label><textarea class="form-textarea tall" id="f-authorBio" placeholder="লেখকের জীবন, সাহিত্যকর্ম, দর্শন বিস্তারিতভাবে। প্রতিটি অনুচ্ছেদ আলাদা লাইনে।"></textarea></div>
             </div>
           </div>
@@ -1056,7 +1140,7 @@
           <div class="form-section" id="form-sec-summary">
             <div class="form-section-title"><svg class="icon"><use href="#i-target"/></svg> <span id="lbl-summary-title">সারসংক্ষেপ ও মূল্যায়ন</span></div>
             <div class="form-row full">
-              <div><label class="form-label" id="lbl-summary-text">চূড়ান্ত মূল্যায়ন <span class="req">*</span></label><textarea class="form-textarea tall" id="f-summary" placeholder="সামগ্রিক মূল্যায়ন, সাহিত্যে অবস্থান ও শেষ মন্তব্য।"></textarea></div>
+              <div><label class="form-label" id="lbl-summary-text">চূড়ান্ত মূল্যায়ন</label><textarea class="form-textarea tall" id="f-summary" placeholder="সামগ্রিক মূল্যায়ন, সাহিত্যে অবস্থান ও শেষ মন্তব্য।"></textarea></div>
             </div>
           </div>
         </div>
@@ -1340,12 +1424,16 @@ function setMode(mode) {
     $('lbl-analysis-title').textContent = 'সমালোচনা অধ্যায়সমূহ';
     $('lbl-add-analysis').textContent = 'নতুন অধ্যায় যোগ করুন';
     $('lbl-summary-title').textContent = 'সারসংক্ষেপ ও মূল্যায়ন';
-    $('lbl-summary-text').innerHTML = 'চূড়ান্ত মূল্যায়ন <span class="req">*</span>';
+    $('lbl-summary-text').innerHTML = 'চূড়ান্ত মূল্যায়ন';
     
     // Hide/show sections
     $('form-sec-author').style.display = 'block';
+    if ($('form-col-author-bn')) $('form-col-author-bn').style.gridColumn = 'span 1';
+    if ($('form-col-author-en')) $('form-col-author-en').style.display = 'block';
+    if ($('form-row-author-dates')) $('form-row-author-dates').style.display = 'grid';
+    if ($('form-row-author-awards')) $('form-row-author-awards').style.display = 'grid';
+    if ($('form-row-author-bio')) $('form-row-author-bio').style.display = 'grid';
     $('form-sec-chars').style.display = 'block';
-    $('form-row-pub').style.display = 'grid';
     $('form-row-pub').style.display = 'grid';
     $('form-row-epi').style.display = 'grid';
     // Show author dropdown in critique mode
@@ -1367,10 +1455,15 @@ function setMode(mode) {
     $('lbl-analysis-title').textContent = 'প্রবন্ধের অনুচ্ছেদসমূহ';
     $('lbl-add-analysis').textContent = 'নতুন অনুচ্ছেদ যোগ করুন';
     $('lbl-summary-title').textContent = 'উপসংহার';
-    $('lbl-summary-text').innerHTML = 'উপসংহার <span class="req">*</span>';
+    $('lbl-summary-text').innerHTML = 'উপসংহার';
     
     // Hide/show sections
-    $('form-sec-author').style.display = 'none'; // Maybe hide author for general essay
+    $('form-sec-author').style.display = 'block';
+    if ($('form-col-author-bn')) $('form-col-author-bn').style.gridColumn = 'span 2';
+    if ($('form-col-author-en')) $('form-col-author-en').style.display = 'none';
+    if ($('form-row-author-dates')) $('form-row-author-dates').style.display = 'none';
+    if ($('form-row-author-awards')) $('form-row-author-awards').style.display = 'none';
+    if ($('form-row-author-bio')) $('form-row-author-bio').style.display = 'none';
     $('form-sec-chars').style.display = 'none';
     $('form-row-pub').style.display = 'none';
     $('form-row-epi').style.display = 'none';
@@ -1945,26 +2038,29 @@ function openBook(id){
 }
 
 function renderBookHTML(b){
+  const isEssay = (b.mode||'critique') === 'essay';
   const sn = bn(books.indexOf(b) + 1);
   let h = `<div class="page">
-    <div class="running-title">${b.bookName} — ${b.authorName}</div>
-    <div class="section-header"><div class="section-number">${sn}</div><div class="section-title">${b.bookName}</div><div class="section-title-light">${b.authorName}</div><div class="section-divider"></div></div>
-    <div class="novel-header"><div class="novel-title-bn">${b.bookName}</div>${b.bookNameEn?`<div class="novel-title-en">${b.bookNameEn}</div>`:''}<div class="novel-meta">লেখক: ${b.authorName}${b.pubYear?' | প্রকাশকাল: '+b.pubYear:''}${b.publisher?' | প্রকাশক: '+b.publisher:''}</div></div>`;
+    <div class="running-title">${isEssay ? b.bookName : b.bookName + ' — ' + b.authorName}</div>
+    <div class="section-header"><div class="section-number">${sn}</div><div class="section-title">${b.bookName}</div>${isEssay ? '' : `<div class="section-title-light">${b.authorName}</div>`}<div class="section-divider"></div></div>
+    <div class="novel-header"><div class="novel-title-bn">${b.bookName}</div>${b.bookNameEn?`<div class="novel-title-en">${b.bookNameEn}</div>`:''}${isEssay ? '' : `<div class="novel-meta">লেখক: ${b.authorName}${b.pubYear?' | প্রকাশকাল: '+b.pubYear:''}${b.publisher?' | প্রকাশক: '+b.publisher:''}</div>`}</div>`;
   if (b.epigraph) h += `<div class="epigraph"><div class="epigraph-text">"${b.epigraph}"</div></div>`;
 
-  // Author
-  h += `<h2>${sn}.১ লেখকের পরিচিতি: ${b.authorName}</h2>`;
-  h += `<div class="author-profile"><div class="author-name">${b.authorName}</div>`;
-  if (b.authorNameEn) h += `<div class="author-name-en">${b.authorNameEn}${b.authorDates?' ('+b.authorDates+')':''}</div>`;
-  h += `<dl class="author-detail">`;
-  if (b.authorDates) h += `<dt>সময়কাল:</dt><dd>${b.authorDates}</dd>`;
-  if (b.authorEdu) h += `<dt>শিক্ষা:</dt><dd>${b.authorEdu}</dd>`;
-  if (b.authorAwards) h += `<dt>পুরস্কার:</dt><dd>${b.authorAwards}</dd>`;
-  h += `</dl></div>`;
-  h += textToParas(b.authorBio);
+  // Author section - only for critique mode
+  if (!isEssay){
+    h += `<h2>${sn}.১ লেখকের পরিচিতি: ${b.authorName}</h2>`;
+    h += `<div class="author-profile"><div class="author-name">${b.authorName}</div>`;
+    if (b.authorNameEn) h += `<div class="author-name-en">${b.authorNameEn}${b.authorDates?' ('+b.authorDates+')':''}</div>`;
+    h += `<dl class="author-detail">`;
+    if (b.authorDates) h += `<dt>সময়কাল:</dt><dd>${b.authorDates}</dd>`;
+    if (b.authorEdu) h += `<dt>শিক্ষা:</dt><dd>${b.authorEdu}</dd>`;
+    if (b.authorAwards) h += `<dt>পুরস্কার:</dt><dd>${b.authorAwards}</dd>`;
+    h += `</dl></div>`;
+    h += textToParas(b.authorBio);
+  }
 
-  // Characters
-  if (b.chars && b.chars.length > 0){
+  // Characters - only for critique mode
+  if (!isEssay && b.chars && b.chars.length > 0){
     h += `<h2>${sn}.২ চরিত্র পরিচিতি</h2>`;
     b.chars.forEach(c => {
       h += `<div class="char-card"><div class="char-name">${c.name}</div><p class="char-desc">${c.desc||''}</p></div>`;
@@ -1972,17 +2068,21 @@ function renderBookHTML(b){
   }
 
   // Analysis
-  let si = (b.chars && b.chars.length > 0) ? 3 : 2;
+  let si = isEssay ? 1 : ((b.chars && b.chars.length > 0) ? 3 : 2);
   (b.analyses||[]).forEach(a => {
     const num = bn(si);
     h += `<h2>${sn}.${num} ${a.title}</h2>`;
+    
+    // Unified parsing for rich text, lists, and dynamic #T / #P insertion
+    let contentHTML = textToParas(a.body, a);
+    
     if (a.type === 'blockquote'){
-      h += `<blockquote><p>${a.body.replace(/\n/g,'<br>')}</p></blockquote>`;
+      h += `<blockquote>${contentHTML}</blockquote>`;
     } else if (a.type && a.type.startsWith('analysis-')){
       const cls = a.type === 'analysis-blue' ? ' blue-box' : a.type === 'analysis-red' ? ' red-box' : '';
-      h += `<div class="analysis-box${cls}"><div class="analysis-box-title"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg> ${a.title}</div>${textToParas(a.body)}</div>`;
+      h += `<div class="analysis-box${cls}"><div class="analysis-box-title"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg> ${a.title}</div>${contentHTML}</div>`;
     } else {
-      h += textToParas(a.body);
+      h += contentHTML;
     }
     si++;
   });
@@ -1994,15 +2094,204 @@ function renderBookHTML(b){
   return h;
 }
 
-function textToParas(text){
-  if (!text) return '';
-  return text.split(/\n\s*\n|\n/).filter(p => p.trim()).map((p,i) => {
-    if (i === 0) return `<p class="drop-cap no-indent">${p.trim()}</p>`;
-    return `<p>${p.trim()}</p>`;
-  }).join('\n');
+function parseRichText(text, a = null){
+  const tableHTML = (a && a.type === 'table' && a.tableData) ? renderTableHTML(a.tableData, a.tableCaption || '') : '';
+  const imageHTML = (a && a.type === 'image' && (a.imgData || a.imgUrl)) ? `<div class="analysis-img-block"><div class="analysis-img-wrap"><img src="${a.imgUrl || a.imgData}" alt="${a.imgCaption||''}" loading="lazy"></div>${a.imgCaption ? `<div class="analysis-img-caption">${a.imgCaption}</div>` : ''}</div>` : '';
+  
+  // If the user leaves the paragraph blank but selected table/image, still show it.
+  if (!text) return tableHTML || imageHTML || '';
+  
+  // Handle bold text (*text*) across the whole body first
+  text = text.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+  
+  // Split into lines for list/table processing
+  const lines = text.split('\n');
+  let html = '';
+  let inUl = false;
+  let inOl = false;
+  let olType = '1'; // '1' for English, 'bn' for Bangla
+  
+  let renderedTable = false;
+  let renderedImage = false;
+
+  for (let i = 0; i < lines.length; i++){
+    let line = lines[i].trim();
+    if (!line) {
+      // Empty line closes lists and adds space
+      if (inUl) { html += '</ul>'; inUl = false; }
+      if (inOl) { html += '</ol>'; inOl = false; }
+      continue;
+    }
+    
+    // Check for table insertion marker (#T)
+    if (line === '#T' && tableHTML){
+      if (inUl) { html += '</ul>'; inUl = false; }
+      if (inOl) { html += '</ol>'; inOl = false; }
+      html += tableHTML;
+      renderedTable = true;
+      continue;
+    }
+    
+    // Check for picture insertion marker (#P)
+    if (line === '#P' && imageHTML){
+      if (inUl) { html += '</ul>'; inUl = false; }
+      if (inOl) { html += '</ol>'; inOl = false; }
+      html += imageHTML;
+      renderedImage = true;
+      continue;
+    }
+    
+    // Check for quote marker (#Q text...)
+    const qMatch = line.match(/^#Q\s+(.+)/);
+    if (qMatch){
+      if (inUl) { html += '</ul>'; inUl = false; }
+      if (inOl) { html += '</ol>'; inOl = false; }
+      html += `<blockquote class="rich-quote">${parseRichTextInline(qMatch[1])}</blockquote>`;
+      continue;
+    }
+    
+    // Check for unordered list (##)
+    if (line.startsWith('##')){
+      if (inOl) { html += '</ol>'; inOl = false; }
+      if (!inUl) { html += '<ul class="rich-list">'; inUl = true; }
+      const content = line.replace(/^##\s*/, '');
+      html += `<li>${parseRichTextInline(content)}</li>`;
+      continue;
+    }
+    
+    // Check for ordered list (#1, #১, etc.)
+    const olMatch = line.match(/^#([0-9০-৯]+)\s*(.*)/);
+    if (olMatch){
+      if (inUl) { html += '</ul>'; inUl = false; }
+      const num = olMatch[1];
+      const isBangla = /[০-৯]/.test(num);
+      if (!inOl || olType !== (isBangla ? 'bn' : '1')){
+        if (inOl) html += '</ol>';
+        olType = isBangla ? 'bn' : '1';
+        html += `<ol class="rich-list" data-type="${olType}">`;
+        inOl = true;
+      }
+      const content = olMatch[2];
+      html += `<li>${parseRichTextInline(content)}</li>`;
+      continue;
+    }
+    
+    // Regular paragraph - close any open lists
+    if (inUl) { html += '</ul>'; inUl = false; }
+    if (inOl) { html += '</ol>'; inOl = false; }
+    
+    // Fallback replacement if #T or #P is in the middle of a line
+    let parsedLine = parseRichTextInline(line);
+    if (tableHTML && !renderedTable && parsedLine.includes('#T')) {
+      parsedLine = parsedLine.replace('#T', tableHTML);
+      renderedTable = true;
+    }
+    if (imageHTML && !renderedImage && parsedLine.includes('#P')) {
+      parsedLine = parsedLine.replace('#P', imageHTML);
+      renderedImage = true;
+    }
+    
+    html += `<p>${parsedLine}</p>`;
+  }
+  
+  // Close any remaining open lists
+  if (inUl) html += '</ul>';
+  if (inOl) html += '</ol>';
+  
+  // If user selected Table or Image but didn't write #T/#P in the text, append it at the end
+  if (tableHTML && !renderedTable) {
+    html += tableHTML;
+  }
+  if (imageHTML && !renderedImage) {
+    // Append image at the top of text if no marker was used for best visual flow
+    html = imageHTML + html;
+  }
+  
+  return html;
 }
 
-// ============== EDITOR ==============
+function parseRichTextInline(text){
+  // Handle bold (*text*)
+  text = text.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+  return text;
+}
+
+function textToParas(text, a = null){
+  if (!text) return '';
+  return parseRichText(text, a);
+}
+
+function renderTableHTML(data, caption){
+  const rows = data.split(/\n\s*\n|\n/).filter(r => r.trim());
+  if (rows.length < 1) return '';
+  let h = '<div class="analysis-table-wrap">';
+  if (caption) h += `<div class="analysis-table-caption">${caption}</div>`;
+  h += '<div class="analysis-table-box"><table class="analysis-table"><thead>';
+  const headers = rows[0].split(/[,\t|]/).map(c => c.trim());
+  h += '<tr>';
+  headers.forEach(c => { h += `<th>${c}</th>`; });
+  h += '</tr></thead><tbody>';
+  for (let r = 1; r < rows.length; r++){
+    const cells = rows[r].split(/[,\t|]/).map(c => c.trim());
+    h += '<tr>';
+    cells.forEach(c => { h += `<td>${c}</td>`; });
+    for (let c = cells.length; c < headers.length; c++){ h += '<td></td>'; }
+    h += '</tr>';
+  }
+  h += '</tbody></table></div></div>';
+  return h;
+}
+
+function rebuildEditableTable(n) {
+  const container = $('editable-table-' + n);
+  const wrap = document.getElementById('analysis-' + n);
+  if (!container || !wrap) return;
+  const rows = parseInt(wrap.querySelector('.analysis-table-rows')?.value) || 3;
+  const cols = parseInt(wrap.querySelector('.analysis-table-cols')?.value) || 3;
+  const hidden = wrap.querySelector('.analysis-table-data');
+  let existing = [];
+  if (hidden && hidden.value.trim()) existing = hidden.value.split('\n').map(r => r.split(/[,\t|]/));
+
+  let html = '<table class="editable-table" style="width:100%;border-collapse:collapse;font-family:\'Noto Sans Bengali\',sans-serif;font-size:11.5pt;table-layout:auto">';
+  // Build header row
+  html += '<thead><tr style="background:var(--bg-soft);border-bottom:2px solid var(--border)">';
+  for (let c = 0; c < cols; c++) {
+    const val = (existing[0] && existing[0][c]) ? existing[0][c].trim() : 'শিরোনাম' + (c+1);
+    html += `<th style="padding:10px 12px;border-right:1px solid var(--border-soft);text-align:left;font-weight:700;color:var(--ink);min-width:80px" contenteditable="true">${val}</th>`;
+  }
+  html += '</tr></thead><tbody>';
+  // Build data rows
+  for (let r = 1; r < rows; r++) {
+    html += '<tr style="border-bottom:1px solid var(--border-soft)">';
+    for (let c = 0; c < cols; c++) {
+      const val = (existing[r] && existing[r][c]) ? existing[r][c].trim() : '';
+      html += `<td style="padding:10px 12px;border-right:1px solid var(--border-soft);color:var(--ink-light);min-width:80px" contenteditable="true">${val}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  container.innerHTML = html;
+
+  // Auto-save to hidden input when cells change
+  const saveTableData = () => {
+    const tds = container.querySelectorAll('th, td');
+    const rowData = [];
+    let currentRow = [];
+    tds.forEach(cell => {
+      currentRow.push(cell.innerText.trim());
+      if (currentRow.length === cols) { rowData.push(currentRow.join(',')); currentRow = []; }
+    });
+    if (hidden) hidden.value = rowData.join('\n');
+  };
+
+  container.querySelectorAll('[contenteditable]').forEach(cell => {
+    cell.addEventListener('input', saveTableData);
+    cell.addEventListener('blur', saveTableData);
+  });
+  saveTableData();
+}
+
+function generateTableTemplate(n) { rebuildEditableTable(n); }
 function addCharField(data={}){
   charCount++;
   const c = document.createElement('div');
@@ -2017,18 +2306,114 @@ function addAnalysisField(data={}){
   analysisCount++;
   const a = document.createElement('div');
   a.className = 'repeat-group';
+  a.id = 'analysis-' + analysisCount;
+  const hasImage = (data.type||'') === 'image';
+  const hasTable = (data.type||'') === 'table';
+  const n = analysisCount;
   a.innerHTML = `<button class="repeat-remove" onclick="this.parentElement.remove()"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
-    <div class="form-row"><div><label class="form-label">অধ্যায়ের শিরোনাম</label><input class="form-input analysis-title-input" placeholder="মার্কসবাদী দৃষ্টিকোণ" value="${(data.title||'').replace(/"/g,'&quot;')}"></div>
-    <div><label class="form-label">বক্স ধরন</label><select class="form-input analysis-type-input">
+    <div class="form-row"><div><label class="form-label">শিরোনাম</label><input class="form-input analysis-title-input" placeholder="শিরোনাম" value="${(data.title||'').replace(/"/g,'&quot;')}"></div>
+    <div><label class="form-label">বক্স ধরন</label><select class="form-input analysis-type-input" onchange="toggleAnalysisFields(this,${n})">
       <option value="">সাধারণ অনুচ্ছেদ</option>
       <option value="analysis-green">বিশ্লেষণ (সবুজ)</option>
       <option value="analysis-blue">বিশ্লেষণ (নীল)</option>
       <option value="analysis-red">বিশ্লেষণ (লাল)</option>
       <option value="blockquote">উদ্ধৃতি ব্লক</option>
+      <option value="image"${hasImage?' selected':''}>ছবি + শিরোনাম</option>
+      <option value="table"${hasTable?' selected':''}>ছক (Table)</option>
     </select></div></div>
-    <div class="form-row full"><div><label class="form-label">বিস্তারিত আলোচনা</label><textarea class="form-textarea tall analysis-body-input" placeholder="বিস্তারিতভাবে লিখুন। প্রতিটি অনুচ্ছেদ আলাদা করতে ফাঁকা লাইন রাখুন।">${data.body||''}</textarea></div></div>`;
+    <div class="form-row full" id="analysis-body-wrap-${n}"><div><label class="form-label">বিস্তারিত আলোচনা <span style="font-weight:400;font-size:9pt;color:var(--ink-lighter)">| ## আনলিস্ট, #১ অর্ডার লিস্ট, *বোল্ড*, #T টেবিল</span></label><textarea class="form-textarea tall analysis-body-input" placeholder="বিস্তারিতভাবে লিখুন। উদাহরণ:&#10;## প্রথম পয়েন্ট&#10;## দ্বিতীয় পয়েন্ট&#10;#১ প্রথম ধাপ&#10;#২ দ্বিতীয় ধাপ&#10;এই শব্দটি *গুরুত্বপূর্ণ*">${data.body||''}</textarea></div></div>
+    <div id="analysis-image-wrap-${n}" style="display:${hasImage?'block':'none'}">
+      <div class="form-row full"><div><label class="form-label">ছবির শিরোনাম (Caption)</label><input class="form-input analysis-img-caption" placeholder="ছবি বর্ণনা লিখুন" value="${data.imgCaption||''}"></div></div>
+      <div class="form-row">
+        <div><label class="form-label">ছবি আপলোড করুন</label>
+          <input type="file" class="form-input analysis-img-file" accept="image/*" style="padding:6px" onchange="previewImage(this,${n})">
+          <input type="hidden" class="analysis-img-data" value="${data.imgData||''}">
+        </div>
+        <div><label class="form-label">অথবা ছবির URL দিন</label>
+          <input type="text" class="form-input analysis-img-url" placeholder="https://example.com/image.jpg" value="${data.imgUrl||''}" oninput="previewImageUrl(this,${n})">
+        </div>
+      </div>
+      <div class="form-row full"><div id="analysis-img-preview-${n}">
+        ${data.imgData || data.imgUrl ? `<img src="${data.imgUrl || data.imgData}" style="max-width:180px;border-radius:8px;border:1px solid var(--border);margin-top:4px">` : ''}
+      </div></div>
+    </div>
+    <div id="analysis-table-wrap-${n}" style="display:${hasTable?'block':'none'}">
+      <div class="form-row">
+        <div><label class="form-label">সারি সংখ্যা (Rows)</label><input type="number" class="form-input analysis-table-rows" value="${data.tableRows||3}" min="2" max="20" onchange="rebuildEditableTable(${n})"></div>
+        <div><label class="form-label">কলাম সংখ্যা (Columns)</label><input type="number" class="form-input analysis-table-cols" value="${data.tableCols||3}" min="2" max="8" onchange="rebuildEditableTable(${n})"></div>
+      </div>
+      <div class="form-row full">
+        <div><label class="form-label">ছকের শিরোনাম / ক্যাপশন (ঐচ্ছিক)</label><input class="form-input analysis-table-caption" placeholder="যেমন: ছক ১: তুলনামূলক বিশ্লেষণ" value="${data.tableCaption||''}"></div>
+      </div>
+      <div class="form-row full">
+        <label class="form-label" style="margin-bottom:4px">সরাসরি টেবিলে লিখুন (সারি/কলাম পূরণ করে)</label>
+        <input type="hidden" class="analysis-table-data" value="${(data.tableData||'').replace(/\"/g,'&quot;')}">
+        <div class="editable-table-container" id="editable-table-${n}" style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;background:#fff"></div>
+      </div>
+    </div>`;
   $('analysis-container').appendChild(a);
   if (data.type) a.querySelector('.analysis-type-input').value = data.type;
+  // Rebuild editable table after DOM insertion (must be after appendChild)
+  if (hasTable) setTimeout(() => rebuildEditableTable(n), 50);
+}
+
+function toggleAnalysisFields(sel, n){
+  const wrap = sel.closest('.repeat-group');
+  const type = sel.value;
+  const bodyWrap = wrap.querySelector('#analysis-body-wrap-'+n);
+  const imgWrap = wrap.querySelector('#analysis-image-wrap-'+n);
+  const tableWrap = wrap.querySelector('#analysis-table-wrap-'+n);
+  if (!bodyWrap || !imgWrap || !tableWrap) return;
+  bodyWrap.style.display = 'block';
+  imgWrap.style.display = type === 'image' ? 'block' : 'none';
+  tableWrap.style.display = type === 'table' ? 'block' : 'none';
+}
+
+function previewImage(input, n){
+  const file = input.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 800; // Standard web width
+      let width = img.width;
+      let height = img.height;
+
+      if (width > MAX_WIDTH) {
+        height *= MAX_WIDTH / width;
+        width = MAX_WIDTH;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Compress to WebP (best) or JPEG
+      const compressedData = canvas.toDataURL('image/jpeg', 0.6); // 60% quality
+      
+      const dataInput = input.closest('.repeat-group').querySelector('.analysis-img-data');
+      if (dataInput) dataInput.value = compressedData;
+      
+      const preview = $('analysis-img-preview-'+n);
+      if (preview) preview.innerHTML = `<img src="${compressedData}" style="max-width:180px;border-radius:8px;border:1px solid var(--border);margin-top:4px">`;
+      console.log('Original size:', Math.round(file.size/1024), 'KB');
+      console.log('Compressed size:', Math.round(compressedData.length * 3/4 / 1024), 'KB');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewImageUrl(input, n){
+  const url = input.value.trim();
+  const preview = $('analysis-img-preview-'+n);
+  if (!preview) return;
+  if (!url) { preview.innerHTML = ''; return; }
+  preview.innerHTML = `<img src="${url}" style="max-width:180px;border-radius:8px;border:1px solid var(--border);margin-top:4px" onerror="this.style.display='none';alert('ছবিটি লোড করা সম্ভব হচ্ছে না, সঠিক URL দিন।')">`;
 }
 
 function resetForm(){
@@ -2042,14 +2427,29 @@ function resetForm(){
   editingAuthorName = null;
   resetAuthorSelect();
   // Restore form visibility
+  const isEssay = currentMode === 'essay';
   $('form-sec-book').style.display = 'block';
-  $('form-sec-author').style.display = currentMode === 'essay' ? 'none' : 'block';
-  $('form-sec-chars').style.display = currentMode === 'essay' ? 'none' : 'block';
+  $('form-sec-author').style.display = 'block';
+  $('form-sec-chars').style.display = isEssay ? 'none' : 'block';
   $('form-sec-analysis').style.display = 'block';
   $('form-sec-summary').style.display = 'block';
-  $('form-row-author-select').style.display = currentMode === 'essay' ? 'none' : 'block';
-  $('form-row-pub').style.display = currentMode === 'essay' ? 'none' : 'grid';
-  $('form-row-epi').style.display = currentMode === 'essay' ? 'none' : 'grid';
+  $('form-row-author-select').style.display = isEssay ? 'none' : 'block';
+  $('form-row-pub').style.display = isEssay ? 'none' : 'grid';
+  $('form-row-epi').style.display = isEssay ? 'none' : 'grid';
+  
+  if (isEssay) {
+    if ($('form-col-author-bn')) $('form-col-author-bn').style.gridColumn = 'span 2';
+    if ($('form-col-author-en')) $('form-col-author-en').style.display = 'none';
+    if ($('form-row-author-dates')) $('form-row-author-dates').style.display = 'none';
+    if ($('form-row-author-awards')) $('form-row-author-awards').style.display = 'none';
+    if ($('form-row-author-bio')) $('form-row-author-bio').style.display = 'none';
+  } else {
+    if ($('form-col-author-bn')) $('form-col-author-bn').style.gridColumn = 'span 1';
+    if ($('form-col-author-en')) $('form-col-author-en').style.display = 'block';
+    if ($('form-row-author-dates')) $('form-row-author-dates').style.display = 'grid';
+    if ($('form-row-author-awards')) $('form-row-author-awards').style.display = 'grid';
+    if ($('form-row-author-bio')) $('form-row-author-bio').style.display = 'grid';
+  }
   $('editor-title').textContent = currentMode === 'essay' ? 'নতুন প্রবন্ধ রচনা' : 'নতুন গ্রন্থ সমালোচনা';
   $('save-btn-text').textContent = 'সংরক্ষণ করুন';
   // Update sidebar nav and dashboard labels
@@ -2073,15 +2473,29 @@ function editCurrentBook(){
   if (!b) return;
   editingAuthorName = null;
   setMode(b.mode || 'critique');
-  // Restore form visibility
+  // Restore form visibility based on mode
+  const isEssay = (b.mode||'critique') === 'essay';
   $('form-sec-book').style.display = 'block';
   $('form-sec-author').style.display = 'block';
-  $('form-sec-chars').style.display = 'block';
+  $('form-sec-chars').style.display = isEssay ? 'none' : 'block';
   $('form-sec-analysis').style.display = 'block';
   $('form-sec-summary').style.display = 'block';
-  $('form-row-author-select').style.display = 'block';
-  $('form-row-pub').style.display = 'grid';
-  $('form-row-epi').style.display = 'grid';
+  $('form-row-author-select').style.display = isEssay ? 'none' : 'block';
+  $('form-row-pub').style.display = isEssay ? 'none' : 'grid';
+  $('form-row-epi').style.display = isEssay ? 'none' : 'grid';
+  if (isEssay) {
+    if ($('form-col-author-bn')) $('form-col-author-bn').style.gridColumn = 'span 2';
+    if ($('form-col-author-en')) $('form-col-author-en').style.display = 'none';
+    if ($('form-row-author-dates')) $('form-row-author-dates').style.display = 'none';
+    if ($('form-row-author-awards')) $('form-row-author-awards').style.display = 'none';
+    if ($('form-row-author-bio')) $('form-row-author-bio').style.display = 'none';
+  } else {
+    if ($('form-col-author-bn')) $('form-col-author-bn').style.gridColumn = 'span 1';
+    if ($('form-col-author-en')) $('form-col-author-en').style.display = 'block';
+    if ($('form-row-author-dates')) $('form-row-author-dates').style.display = 'grid';
+    if ($('form-row-author-awards')) $('form-row-author-awards').style.display = 'grid';
+    if ($('form-row-author-bio')) $('form-row-author-bio').style.display = 'grid';
+  }
   editingBookId = b.id;
   $('f-id').value = b.id;
   $('f-bookName').value = b.bookName || '';
@@ -2185,13 +2599,13 @@ async function saveBook(){
 
   const bookName = $('f-bookName').value.trim();
   const authorName = currentMode === 'essay'
-    ? ($('f-authorName').value.trim() || 'প্রাবন্ধিক')
+    ? ($('f-authorName').value.trim() || '')
     : $('f-authorName').value.trim();
   const authorBio = currentMode === 'essay' ? '' : $('f-authorBio').value.trim();
   const summary = $('f-summary').value.trim();
 
-  const missingCritiqueFields = currentMode === 'critique' && (!bookName || !authorName || !authorBio || !summary);
-  const missingEssayFields = currentMode === 'essay' && (!bookName || !summary);
+  const missingCritiqueFields = currentMode === 'critique' && (!bookName || !authorName || !authorBio);
+  const missingEssayFields = currentMode === 'essay' && !bookName;
   if (missingCritiqueFields || missingEssayFields){
     toast('আবশ্যক ক্ষেত্রগুলি পূরণ করুন (লাল চিহ্নিত)', 'error');
     return;
@@ -2209,7 +2623,22 @@ async function saveBook(){
     const title = g.querySelector('.analysis-title-input')?.value.trim();
     const type = g.querySelector('.analysis-type-input')?.value || '';
     const body = g.querySelector('.analysis-body-input')?.value.trim();
-    if (title && body) analyses.push({title, type, body});
+    if (!title) return;
+    const item = {title, type, body: body || ''};
+    if (type === 'image'){
+      item.imgCaption = (g.querySelector('.analysis-img-caption')?.value || '').trim();
+      item.imgData = g.querySelector('.analysis-img-data')?.value || '';
+      item.imgUrl = (g.querySelector('.analysis-img-url')?.value || '').trim();
+      if (!item.imgData && !item.imgUrl && !item.body) return;
+    }
+    if (type === 'table'){
+      item.tableRows = g.querySelector('.analysis-table-rows')?.value || '3';
+      item.tableCols = g.querySelector('.analysis-table-cols')?.value || '3';
+      item.tableData = (g.querySelector('.analysis-table-data')?.value || '').trim();
+      item.tableCaption = (g.querySelector('.analysis-table-caption')?.value || '').trim();
+      if (!item.tableData) return;
+    }
+    analyses.push(item);
   });
 
   const data = {
@@ -2280,7 +2709,7 @@ function exportPDF(){
       if (b.authorEdu) h += `<dt>শিক্ষা:</dt><dd>${b.authorEdu}</dd>`;
       if (b.authorAwards) h += `<dt>পুরস্কার:</dt><dd>${b.authorAwards}</dd>`;
       h += `</dl></div>`;
-      h += (b.authorBio||'').split(/\n\s*\n|\n/).filter(p=>p.trim()).map((p,j)=>`<p class="${j===0?'drop-cap no-indent':''}">${p.trim()}</p>`).join('\n');
+      h += parseRichText(b.authorBio);
       if (b.chars && b.chars.length > 0){
         h += `<h2>${sn}.২ চরিত্র পরিচিতি</h2>`;
         b.chars.forEach(c => { h += `<div class="char-card"><div class="char-name">${c.name}</div><p class="char-desc">${c.desc||''}</p></div>`; });
@@ -2289,18 +2718,19 @@ function exportPDF(){
       (b.analyses||[]).forEach(a => {
         const num = bn(si);
         h += `<h2>${sn}.${num} ${a.title}</h2>`;
+        let contentHTML = textToParas(a.body, a);
         if (a.type === 'blockquote'){
-          h += `<blockquote><p>${a.body.replace(/\n/g,'<br>')}</p></blockquote>`;
+          h += `<blockquote>${contentHTML}</blockquote>`;
         } else if (a.type && a.type.startsWith('analysis-')){
           const cls = a.type === 'analysis-blue' ? ' blue-box' : a.type === 'analysis-red' ? ' red-box' : '';
-          h += `<div class="analysis-box${cls}"><div class="analysis-box-title"><svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> ${a.title}</div>${a.body.split(/\n\s*\n|\n/).filter(p=>p.trim()).map((p,j)=>`<p class="${j===0?'no-indent':''}">${p.trim()}</p>`).join('\n')}</div>`;
+          h += `<div class="analysis-box${cls}"><div class="analysis-box-title"><svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> ${a.title}</div>${contentHTML}</div>`;
         } else {
-          h += a.body.split(/\n\s*\n|\n/).filter(p=>p.trim()).map((p,j)=>`<p class="${j===0?'drop-cap no-indent':''}">${p.trim()}</p>`).join('\n');
+          h += contentHTML;
         }
         si++;
       });
       h += `<h2>${sn}.${bn(si)} সারসংক্ষেপ ও মূল্যায়ন</h2>`;
-      h += (b.summary||'').split(/\n\s*\n|\n/).filter(p=>p.trim()).map((p,j)=>`<p class="${j===0?'drop-cap no-indent':''}">${p.trim()}</p>`).join('\n');
+      h += parseRichText(b.summary);
       h += `</div>`;
     });
     return h;
@@ -2311,30 +2741,31 @@ function exportPDF(){
     arr.forEach((b, i) => {
       const sn = bn(startNum + i);
       h += `<div class="pdf-page">
-        <div class="page-header"><span>${b.bookName} — ${b.authorName}</span></div>
-        <div class="section-header"><div class="section-number">${sn}</div><div class="section-title">${b.bookName}</div><div class="section-title-light">${b.bookNameEn||b.authorName}</div><div class="section-divider"></div></div>
-        <div class="novel-header"><div class="novel-title-bn">${b.bookName}</div>${b.bookNameEn?`<div class="novel-title-en">${b.bookNameEn}</div>`:''}<div class="novel-meta">প্রাবন্ধিক: ${b.authorName}</div></div>`;
+        <div class="page-header"><span>${b.bookName}</span></div>
+        <div class="section-header"><div class="section-number">${sn}</div><div class="section-title">${b.bookName}</div>${b.bookNameEn?`<div class="section-title-light">${b.bookNameEn}</div>`:''}<div class="section-divider"></div></div>
+        <div class="novel-header"><div class="novel-title-bn">${b.bookName}</div>${b.bookNameEn?`<div class="novel-title-en">${b.bookNameEn}</div>`:''}</div>`;
       if (b.epigraph) h += `<div class="epigraph"><div class="epigraph-text">"${b.epigraph}"</div></div>`;
       if (b.authorBio) {
         h += `<h2>${sn}.১ পরিচিতি</h2>`;
-        h += (b.authorBio||'').split(/\n\s*\n|\n/).filter(p=>p.trim()).map((p,j)=>`<p class="${j===0?'drop-cap no-indent':''}">${p.trim()}</p>`).join('\n');
+        h += parseRichText(b.authorBio);
       }
       let si = b.authorBio ? 2 : 1;
       (b.analyses||[]).forEach(a => {
         const num = bn(si);
         h += `<h2>${sn}.${num} ${a.title}</h2>`;
+        let contentHTML = textToParas(a.body, a);
         if (a.type === 'blockquote'){
-          h += `<blockquote><p>${a.body.replace(/\n/g,'<br>')}</p></blockquote>`;
+          h += `<blockquote>${contentHTML}</blockquote>`;
         } else if (a.type && a.type.startsWith('analysis-')){
           const cls = a.type === 'analysis-blue' ? ' blue-box' : a.type === 'analysis-red' ? ' red-box' : '';
-          h += `<div class="analysis-box${cls}"><div class="analysis-box-title"><svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> ${a.title}</div>${a.body.split(/\n\s*\n|\n/).filter(p=>p.trim()).map((p,j)=>`<p class="${j===0?'no-indent':''}">${p.trim()}</p>`).join('\n')}</div>`;
+          h += `<div class="analysis-box${cls}"><div class="analysis-box-title"><svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> ${a.title}</div>${contentHTML}</div>`;
         } else {
-          h += a.body.split(/\n\s*\n|\n/).filter(p=>p.trim()).map((p,j)=>`<p class="${j===0?'drop-cap no-indent':''}">${p.trim()}</p>`).join('\n');
+          h += contentHTML;
         }
         si++;
       });
       h += `<h2>${sn}.${bn(si)} উপসংহার</h2>`;
-      h += (b.summary||'').split(/\n\s*\n|\n/).filter(p=>p.trim()).map((p,j)=>`<p class="${j===0?'drop-cap no-indent':''}">${p.trim()}</p>`).join('\n');
+      h += parseRichText(b.summary);
       h += `<div class="page-footer-marker">— সমাপ্ত —</div></div>`;
     });
     return h;
@@ -2391,6 +2822,13 @@ function exportPDF(){
   .drop-cap::first-letter{font-size:3em;float:left;line-height:.78;margin:3px 7px 0 0;color:#8B5E3C;font-weight:700}
   blockquote{margin:14px 0;padding:12px 18px;border-left:3px solid #8B5E3C;background:rgba(139,94,60,.04);border-radius:0 6px 6px 0;font-style:italic}
   blockquote p{text-indent:0;font-size:10pt;color:#5A4E45}
+  
+  /* RICH TEXT LISTS (PDF) */
+  .rich-list{margin:12px 0 12px 28px;padding:0}
+  .rich-list li{font-size:10.5pt;line-height:1.9;color:#2C2420;margin-bottom:6px;padding-left:6px}
+  .rich-list ul, .rich-list ol{margin-top:6px;margin-bottom:6px}
+  .rich-list[data-type="bn"]{list-style-type:bengali}
+  .rich-list[data-type="1"]{list-style-type:decimal}
   .char-card{background:rgba(255,255,255,.6);border:1px solid #E8D5B0;border-radius:7px;padding:14px 18px;margin:12px 0;position:relative}
   .char-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:#8B5E3C;border-radius:7px 0 0 7px}
   .char-name{font-size:11.5pt;font-weight:700;color:#8B5E3C;margin-bottom:4px}
@@ -2417,6 +2855,40 @@ function exportPDF(){
   .novel-meta{font-size:8.5pt;color:#8A7E75;margin-top:5px}
   .page-footer-marker{text-align:center;font-size:9pt;color:var(--ink-lighter);font-style:italic;margin-top:36px}
   .ico{display:inline-block;vertical-align:middle}
+  
+  /* PDF MODERN QUOTE */
+  .rich-quote{
+    position:relative;margin:20px auto;padding:24px 30px 22px 50px;max-width:90%;
+    background:linear-gradient(135deg,rgba(184,147,90,.08),rgba(139,94,60,.04));
+    border-left:4px solid #8B5E3C;border-radius:0 12px 12px 0;
+    font-family:'Noto Serif Bengali',serif;font-style:italic;
+    font-size:11pt;line-height:1.85;color:#5A4E45;
+  }
+  .rich-quote::before{
+    content:'"';position:absolute;left:14px;top:-6px;
+    font-family:Georgia,serif;font-size:42pt;color:#8B5E3C;
+    line-height:1;opacity:.5;font-style:normal;
+  }
+  
+  /* PDF MODERN TABLE — full width, colorful */
+  .analysis-table-wrap{margin:20px 0;width:100%}
+  .analysis-table-caption{font-size:10.5pt;font-weight:600;color:#8B5E3C;text-align:left;padding:0 4px 10px;font-family:'Noto Sans Bengali',sans-serif;line-height:1.5}
+  .analysis-table-box{width:100%;overflow:hidden;border-radius:10px;border:1.5px solid #ddd;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+  .analysis-table{width:100%;border-collapse:collapse;font-family:'Noto Sans Bengali',sans-serif;font-size:10pt;text-align:left}
+  .analysis-table thead tr{background:linear-gradient(135deg,#4A6D7C,#3B5A69)}
+  .analysis-table thead th{padding:12px 18px;text-align:left;font-weight:700;font-size:10pt;color:#fff;border-bottom:2.5px solid rgba(0,0,0,.1);border-right:1px solid rgba(255,255,255,.15)}
+  .analysis-table thead th:last-child{border-right:none}
+  .analysis-table tbody tr:nth-child(odd){background:#F8FAFB}
+  .analysis-table tbody tr:nth-child(even){background:#EBF3F7}
+  .analysis-table tbody td{padding:11px 18px;border-bottom:1px solid #E0EBF0;border-right:1px solid #E0EBF0;color:#334155}
+  .analysis-table tbody tr:last-child td{border-bottom:none}
+  .analysis-table tbody td:last-child{border-right:none}
+  
+  /* PDF IMAGE — centered */
+  .analysis-img-block{margin:18px auto;text-align:center;clear:both}
+  .analysis-img-wrap{display:inline-block;width:100%;max-width:380px;border-radius:10px;border:1px solid #ddd;overflow:hidden;background:#fff;line-height:0;box-shadow:0 4px 14px rgba(0,0,0,.06)}
+  .analysis-img-wrap img{display:block;width:100%;height:auto;object-fit:contain;max-height:300px}
+  .analysis-img-caption{font-size:9pt;color:#8A7E75;font-style:italic;text-align:center;margin-top:8px;line-height:1.5}
 
   /* TOC */
   .toc-section-title{font-size:11.5pt;font-weight:700;color:#8B5E3C;margin:28px 0 14px;padding-bottom:5px;border-bottom:1px solid #E8D5B0}
@@ -2543,6 +3015,17 @@ async function clearAllData(){
 
 // ============== INIT ==============
 window.addEventListener('DOMContentLoaded', async () => {
+  // Hide splash screen immediately once JS runs
+  const splash = document.getElementById('splash-screen');
+  if (splash) {
+    // Use a tiny timeout to ensure DOM paint has settled
+    setTimeout(() => {
+      splash.classList.add('hide');
+      // Remove from DOM after animation
+      setTimeout(() => splash.remove(), 300);
+    }, 50);
+  }
+
   setMode(currentMode);
   // Load books from Supabase
   setSyncStatus('syncing', 'ডেটা লোড হচ্ছে...');
