@@ -404,20 +404,54 @@
   .rich-list[data-type="1"]{list-style-type:decimal}
   
   /* RICH QUOTE */
-  .rich-quote{
-    position:relative;margin:20px 0;padding:24px 30px 22px 50px;
-    background:linear-gradient(135deg,rgba(184,147,90,.08),rgba(139,94,60,.04));
-    border-left:4px solid var(--accent);border-radius:0 12px 12px 0;
-    font-family:'Noto Serif Bengali',serif;font-style:italic;
-    font-size:11pt;line-height:1.85;color:var(--ink-light);
-    box-shadow:0 2px 12px rgba(139,94,60,.06);
+  .rich-quote {
+    position: relative; margin: 28px 0; padding: 0; width: 100%;
+    font-family: 'Noto Serif Bengali', serif; font-style: italic;
+    font-size: 11.5pt; line-height: 1.95; overflow: hidden;
+    border-radius: 14px;
   }
-  .rich-quote::before{
-    content:'"';position:absolute;left:14px;top:-6px;
-    font-family:Georgia,serif;font-size:42pt;color:var(--accent);
-    line-height:1;opacity:.5;font-style:normal;
+  .rich-quote::before { display: none; }
+  .rich-quote::after  { display: none; }
+
+  /* #Q — left-aligned, accent stripe left, warm tint */
+  .quote-text-left {
+    text-align: left;
+    background: linear-gradient(120deg, #FFF8EE 0%, #FDF5F0 100%);
+    border-left: 5px solid var(--accent);
+    border-radius: 0 14px 14px 0;
+    padding: 22px 28px 22px 24px;
+    box-shadow: 0 4px 20px rgba(139,94,60,.08);
   }
-  
+  .quote-text-left::before {
+    content: '"';
+    display: block; position: absolute; top: 8px; left: 20px;
+    font-family: Georgia, serif; font-size: 48pt; line-height: 1;
+    color: var(--accent); opacity: 0.18; font-style: normal;
+    pointer-events: none;
+  }
+
+  /* #QM — center-aligned, top+bottom gradient bar, teal tint */
+  .quote-text-center {
+    text-align: center;
+    background: linear-gradient(160deg, #E8F5F0 0%, #F0FAF7 100%);
+    border-top: 4px solid #2A9D8F;
+    border-bottom: 4px solid #2A9D8F;
+    border-radius: 14px;
+    padding: 26px 36px;
+    box-shadow: 0 4px 20px rgba(42,157,143,.08);
+    color: #1F4F45;
+  }
+  .quote-text-center::before {
+    content: '"';
+    display: block; text-align: center; width: 100%;
+    font-family: Georgia, serif; font-size: 40pt; line-height: 1;
+    color: #2A9D8F; opacity: 0.25; font-style: normal; margin-bottom: -10px;
+    pointer-events: none;
+  }
+
+  .rich-quote p { margin: 0 0 8px 0 !important; padding: 0 !important; text-indent: 0 !important; text-align: inherit !important; }
+  .rich-quote p:last-child { margin-bottom: 0 !important; }
+
   .page blockquote{margin:14px 0;padding:12px 18px;border-left:3px solid var(--accent);background:rgba(139,94,60,.04);border-radius:0 6px 6px 0;font-style:italic}
   .page blockquote p{text-indent:0;font-size:10pt;color:#5A4E45}
   .char-card{background:rgba(255,255,255,.6);border:1px solid #E8D5B0;border-radius:7px;padding:14px 18px;margin:12px 0;position:relative}
@@ -2095,51 +2129,59 @@ function renderBookHTML(b){
 }
 
 function parseRichText(text, a = null){
-  const tableHTML = (a && a.type === 'table' && a.tableData) ? renderTableHTML(a.tableData, a.tableCaption || '') : '';
+  // Build dynamic tables map: index 1, 2, 3 ... from a.tables array or fallback to a.tableData
+  const tablesMap = {};
+  if (a && a.type === 'table') {
+    const tables = (a.tables && a.tables.length) ? a.tables : [{tableNum:1, tableData: a.tableData||'', caption: a.tableCaption||''}];
+    tables.forEach((t, i) => {
+      if (t.tableData) tablesMap[i+1] = renderTableHTML(t.tableData, t.caption||'');
+    });
+  }
+  const tableHTML1 = tablesMap[1] || '';
+  const tableHTML2 = tablesMap[2] || '';
   const imageHTML = (a && a.type === 'image' && (a.imgData || a.imgUrl)) ? `<div class="analysis-img-block"><div class="analysis-img-wrap"><img src="${a.imgUrl || a.imgData}" alt="${a.imgCaption||''}" loading="lazy"></div>${a.imgCaption ? `<div class="analysis-img-caption">${a.imgCaption}</div>` : ''}</div>` : '';
   
   // If the user leaves the paragraph blank but selected table/image, still show it.
-  if (!text) return tableHTML || imageHTML || '';
+  if (!text) return tableHTML1 + tableHTML2 + imageHTML;
   
-  // Handle bold text (*text*) across the whole body first
-  text = text.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
-  
-  // Split into lines for list/table processing
-  const lines = text.split('\n');
-  let html = '';
-  let inUl = false;
-  let inOl = false;
-  let olType = '1'; // '1' for English, 'bn' for Bangla
-  
-  let renderedTable = false;
-  let renderedImage = false;
-
-  // Regex for multi-line blocks
-  // #Q ... #Q (Left aligned quote)
-  // #QM ... #QM (Middle aligned quote)
-  const quoteBlockRegex = /#Q(M)?([\s\S]*?)#QM?/g;
   let processedText = text;
+
+  // 1. Process multi-line #QM ... #QM and #Q ... #Q blocks
   let quoteIndex = 0;
   const quotePlaceholders = [];
   
-  processedText = processedText.replace(quoteBlockRegex, (match, isMiddle, content) => {
+  // Notice we use [\s\S]*? to match across newlines.
+  // The block will be center-aligned as a whole (margin: 0 auto),
+  // but #QM centers the text, #Q keeps text left-aligned.
+  processedText = processedText.replace(/#(QM|Q)\s+([\s\S]*?)\s+#\1/g, (match, mode, content) => {
     const placeholder = `__QUOTE_${quoteIndex}__`;
-    const alignClass = isMiddle ? 'quote-middle' : 'quote-left';
-    quotePlaceholders.push({ 
-      placeholder: placeholder, 
-      content: `<blockquote class="rich-quote ${alignClass}"><div class="rich-quote-text">${parseRichTextInline(content.trim())}</div></blockquote>` 
+    const isMiddleAligned = mode === 'QM';
+    
+    // Convert newlines in the quote to <br> tags so line breaks are preserved
+    const formattedContent = parseRichTextInline(content.trim()).replace(/\n/g, '<br>');
+    
+    quotePlaceholders.push({
+      placeholder: placeholder,
+      content: `<blockquote class="rich-quote ${isMiddleAligned ? 'quote-text-center' : 'quote-text-left'}">${formattedContent}</blockquote>`
     });
     quoteIndex++;
-    return placeholder;
+    return '\n' + placeholder + '\n';
   });
 
-  // Split into lines for list/table processing
-  const finalLines = processedText.split('\n');
+  // 2. Split into lines to process lists, #T1, #T2, #P
+  const lines = processedText.split('\n');
+  let html = '';
+  let inUl = false;
+  let inOl = false;
+  let olType = '1';
+  
+  let renderedTable1 = false;
+  let renderedTable2 = false;
+  let renderedImage = false;
 
-  for (let i = 0; i < finalLines.length; i++){
-    let line = finalLines[i].trim();
+  for (let i = 0; i < lines.length; i++){
+    let line = lines[i].trim();
     if (!line) {
-      // Empty line closes lists and adds space
       if (inUl) { html += '</ul>'; inUl = false; }
       if (inOl) { html += '</ol>'; inOl = false; }
       continue;
@@ -2149,20 +2191,24 @@ function parseRichText(text, a = null){
     if (line.startsWith('__QUOTE_')) {
       if (inUl) { html += '</ul>'; inUl = false; }
       if (inOl) { html += '</ol>'; inOl = false; }
-      const placeholderData = quotePlaceholders.find(p => line.includes(p.placeholder));
-      if (placeholderData) {
-        html += placeholderData.content;
-      }
+      const placeholderData = quotePlaceholders.find(p => line === p.placeholder);
+      if (placeholderData) html += placeholderData.content;
       continue;
     }
     
-    // Check for table insertion marker (#T)
-    if (line === '#T' && tableHTML){
-      if (inUl) { html += '</ul>'; inUl = false; }
-      if (inOl) { html += '</ol>'; inOl = false; }
-      html += tableHTML;
-      renderedTable = true;
-      continue;
+    // Check for table insertion markers (#T, #T1, #T2 ... #Tn)
+    const tMatch = line.match(/^#T(\d*)$/);
+    if (tMatch) {
+      const tNum = tMatch[1] ? parseInt(tMatch[1]) : 1;
+      const tHTML = tablesMap[tNum];
+      if (tHTML) {
+        if (inUl) { html += '</ul>'; inUl = false; }
+        if (inOl) { html += '</ol>'; inOl = false; }
+        html += tHTML;
+        if (tNum === 1) renderedTable1 = true;
+        if (tNum === 2) renderedTable2 = true;
+        continue;
+      }
     }
     
     // Check for picture insertion marker (#P)
@@ -2183,7 +2229,7 @@ function parseRichText(text, a = null){
       continue;
     }
     
-    // Check for ordered list (#1, #১, etc.)
+    // Check for ordered list (#1, #১)
     const olMatch = line.match(/^#([0-9০-৯]+)\s*(.*)/);
     if (olMatch){
       if (inUl) { html += '</ul>'; inUl = false; }
@@ -2200,42 +2246,32 @@ function parseRichText(text, a = null){
       continue;
     }
 
-    // Regular paragraph - close any open lists
+    // Regular paragraph
     if (inUl) { html += '</ul>'; inUl = false; }
     if (inOl) { html += '</ol>'; inOl = false; }
     
-    // Fallback replacement if #T or #P is in the middle of a line
-    let parsedLine = parseRichTextInline(line);
-    if (tableHTML && !renderedTable && parsedLine.includes('#T')) {
-      parsedLine = parsedLine.replace('#T', tableHTML);
-      renderedTable = true;
-    }
-    if (imageHTML && !renderedImage && parsedLine.includes('#P')) {
-      parsedLine = parsedLine.replace('#P', imageHTML);
-      renderedImage = true;
-    }
-    
-    html += `<p>${parsedLine}</p>`;
+    html += `<p>${parseRichTextInline(line)}</p>`;
   }
   
-  // Close any remaining open lists
   if (inUl) html += '</ul>';
   if (inOl) html += '</ol>';
   
-  // If user selected Table or Image but didn't write #T/#P in the text, append it at the end
-  if (tableHTML && !renderedTable) {
-    html += tableHTML;
-  }
-  if (imageHTML && !renderedImage) {
-    // Append image at the top of text if no marker was used for best visual flow
-    html = imageHTML + html;
-  }
+  // Append any unused tables (fallback if no #T markers in body)
+  Object.keys(tablesMap).forEach(k => {
+    const kn = parseInt(k);
+    if (kn === 1 && renderedTable1) return;
+    if (kn === 2 && renderedTable2) return;
+    html += tablesMap[k];
+  });
+  if (imageHTML && !renderedImage) html = imageHTML + html;
   
   return html;
 }
 
 function parseRichTextInline(text){
-  // Handle bold (*text*)
+  // Handle **text** (Larger inline text)
+  text = text.replace(/\*\*(.*?)\*\*/g, '<span style="font-size:1.1em;font-weight:600">$1</span>');
+  // Handle *text* (Bold text)
   text = text.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
   return text;
 }
@@ -2266,13 +2302,120 @@ function renderTableHTML(data, caption){
   return h;
 }
 
-function rebuildEditableTable(n) {
-  const container = $('editable-table-' + n);
+const tableColors = [
+  {bg:'rgba(212,160,23,0.05)', border:'var(--gold-light)', titleColor:'var(--accent)'},
+  {bg:'rgba(92,122,94,0.05)', border:'rgba(92,122,94,0.3)', titleColor:'var(--green)'},
+  {bg:'rgba(74,109,124,0.05)', border:'rgba(74,109,124,0.3)', titleColor:'var(--blue)'},
+  {bg:'rgba(158,74,74,0.05)', border:'rgba(158,74,74,0.3)', titleColor:'var(--red)'},
+];
+
+function addTableToAnalysis(n, data = {}) {
+  const container = document.getElementById(`analysis-tables-container-${n}`);
+  if (!container) return;
+
+  // Count existing tables
+  const existing = container.querySelectorAll('.analysis-table-block');
+  const tableIdx = data.tableNum != null ? data.tableNum : existing.length + 1;
+  const col = tableColors[(tableIdx - 1) % tableColors.length];
+
+  const block = document.createElement('div');
+  block.className = 'analysis-table-block';
+  block.setAttribute('data-table-num', tableIdx);
+  const blockId = `etable-${n}-${tableIdx}`;
+
+  block.innerHTML = `
+    ${existing.length > 0 ? '<hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-soft)">' : ''}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:${col.bg};border-radius:8px;border:1px dashed ${col.border};margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:${col.titleColor};display:flex;align-items:center;gap:6px">
+        <svg class="icon icon-sm"><use href="#i-bookmark"/></svg> ছক ${tableIdx} <code style="font-size:10px;opacity:.7">#T${tableIdx}</code>
+      </div>
+      ${tableIdx > 1 ? `<button onclick="this.closest('.analysis-table-block').remove();updateTableNumbers(${n})" style="background:none;border:none;cursor:pointer;color:var(--red);padding:2px 6px;border-radius:4px" title="মুছুন"><svg class="icon icon-sm"><use href="#i-trash"/></svg></button>` : ''}
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">সারি সংখ্যা (Rows)</label><input type="number" class="form-input tbl-rows" value="${data.rows||3}" min="2" max="20" onchange="rebuildDynTable('${blockId}')"></div>
+      <div><label class="form-label">কলাম সংখ্যা (Columns)</label><input type="number" class="form-input tbl-cols" value="${data.cols||3}" min="2" max="8" onchange="rebuildDynTable('${blockId}')"></div>
+    </div>
+    <div class="form-row full">
+      <div><label class="form-label">শিরোনাম / ক্যাপশন (ঐচ্ছিক)</label><input class="form-input tbl-caption" placeholder="যেমন: ছক ${tableIdx}: বিশ্লেষণ" value="${data.caption||''}"></div>
+    </div>
+    <div class="form-row full">
+      <label class="form-label" style="margin-bottom:4px">সরাসরি টেবিলে লিখুন</label>
+      <input type="hidden" class="tbl-data" value="${(data.tableData||'').replace(/"/g,'&quot;')}">
+      <div id="${blockId}" style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;background:#fff"></div>
+    </div>
+  `;
+  container.appendChild(block);
+  rebuildDynTable(blockId, data.rows||3, data.cols||3, data.tableData||'');
+}
+
+function updateTableNumbers(n) {
+  const container = document.getElementById(`analysis-tables-container-${n}`);
+  if (!container) return;
+  container.querySelectorAll('.analysis-table-block').forEach((block, i) => {
+    const num = i + 1;
+    block.setAttribute('data-table-num', num);
+  });
+}
+
+function rebuildDynTable(blockId, rows, cols, existing) {
+  const container = document.getElementById(blockId);
+  if (!container) return;
+  const block = container.closest('.analysis-table-block');
+  if (!block) return;
+  rows = rows || parseInt(block.querySelector('.tbl-rows')?.value) || 3;
+  cols = cols || parseInt(block.querySelector('.tbl-cols')?.value) || 3;
+  const hidden = block.querySelector('.tbl-data');
+  let existingData = [];
+  const existingVal = existing !== undefined ? existing : (hidden?.value || '');
+  if (existingVal.trim()) existingData = existingVal.split('\n').map(r => r.split(/[,\t|]/));
+
+  let html = '<table style="width:100%;border-collapse:collapse;font-family:\'Noto Sans Bengali\',sans-serif;font-size:11pt;table-layout:auto"><thead><tr style="background:var(--bg-soft);border-bottom:2px solid var(--border)">';
+  for (let c = 0; c < cols; c++) {
+    const val = (existingData[0] && existingData[0][c]) ? existingData[0][c].trim() : 'শিরোনাম'+(c+1);
+    html += `<th style="padding:10px 12px;border-right:1px solid var(--border-soft);text-align:left;font-weight:700;color:var(--ink);min-width:80px" contenteditable="true">${val}</th>`;
+  }
+  html += '</tr></thead><tbody>';
+  for (let r = 1; r < rows; r++) {
+    html += '<tr style="border-bottom:1px solid var(--border-soft)">';
+    for (let c = 0; c < cols; c++) {
+      const val = (existingData[r] && existingData[r][c]) ? existingData[r][c].trim() : '';
+      html += `<td style="padding:10px 12px;border-right:1px solid var(--border-soft);color:var(--ink-light);min-width:80px" contenteditable="true">${val}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  container.innerHTML = html;
+
+  const save = () => {
+    const tds = container.querySelectorAll('th,td');
+    const rows2 = [];
+    let row = [];
+    tds.forEach(cell => {
+      row.push(cell.innerText.trim().replace(/\n/g,' '));
+      if (row.length === cols) { rows2.push(row.join(',')); row = []; }
+    });
+    if (hidden) hidden.value = rows2.join('\n');
+  };
+  container.querySelectorAll('[contenteditable]').forEach(cell => {
+    cell.addEventListener('input', save);
+    cell.addEventListener('blur', save);
+  });
+  save();
+}
+
+function rebuildEditableTable(n, tableNum = 1) {
+  const containerId = tableNum === 1 ? `editable-table-${n}` : `editable-table-${n}-${tableNum}`;
+  const container = $(containerId);
   const wrap = document.getElementById('analysis-' + n);
   if (!container || !wrap) return;
-  const rows = parseInt(wrap.querySelector('.analysis-table-rows')?.value) || 3;
-  const cols = parseInt(wrap.querySelector('.analysis-table-cols')?.value) || 3;
-  const hidden = wrap.querySelector('.analysis-table-data');
+
+  const rowsClass = tableNum === 1 ? '.analysis-table-rows' : `.analysis-table-rows-${tableNum}`;
+  const colsClass = tableNum === 1 ? '.analysis-table-cols' : `.analysis-table-cols-${tableNum}`;
+  const dataClass = tableNum === 1 ? '.analysis-table-data' : `.analysis-table-data-${tableNum}`;
+
+  const rows = parseInt(wrap.querySelector(rowsClass)?.value) || 3;
+  const cols = parseInt(wrap.querySelector(colsClass)?.value) || 3;
+  const hidden = wrap.querySelector(dataClass);
   let existing = [];
   if (hidden && hidden.value.trim()) existing = hidden.value.split('\n').map(r => r.split(/[,\t|]/));
 
@@ -2302,7 +2445,7 @@ function rebuildEditableTable(n) {
     const rowData = [];
     let currentRow = [];
     tds.forEach(cell => {
-      currentRow.push(cell.innerText.trim());
+      currentRow.push(cell.innerText.trim().replace(/\n/g, ' '));
       if (currentRow.length === cols) { rowData.push(currentRow.join(',')); currentRow = []; }
     });
     if (hidden) hidden.value = rowData.join('\n');
@@ -2362,23 +2505,25 @@ function addAnalysisField(data={}){
       </div></div>
     </div>
     <div id="analysis-table-wrap-${n}" style="display:${hasTable?'block':'none'}">
-      <div class="form-row">
-        <div><label class="form-label">সারি সংখ্যা (Rows)</label><input type="number" class="form-input analysis-table-rows" value="${data.tableRows||3}" min="2" max="20" onchange="rebuildEditableTable(${n})"></div>
-        <div><label class="form-label">কলাম সংখ্যা (Columns)</label><input type="number" class="form-input analysis-table-cols" value="${data.tableCols||3}" min="2" max="8" onchange="rebuildEditableTable(${n})"></div>
-      </div>
-      <div class="form-row full">
-        <div><label class="form-label">ছকের শিরোনাম / ক্যাপশন (ঐচ্ছিক)</label><input class="form-input analysis-table-caption" placeholder="যেমন: ছক ১: তুলনামূলক বিশ্লেষণ" value="${data.tableCaption||''}"></div>
-      </div>
-      <div class="form-row full">
-        <label class="form-label" style="margin-bottom:4px">সরাসরি টেবিলে লিখুন (সারি/কলাম পূরণ করে)</label>
-        <input type="hidden" class="analysis-table-data" value="${(data.tableData||'').replace(/\"/g,'&quot;')}">
-        <div class="editable-table-container" id="editable-table-${n}" style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;background:#fff"></div>
-      </div>
+      <div id="analysis-tables-container-${n}"></div>
+      <button type="button" class="add-repeat" style="margin-top:12px;width:100%;justify-content:center" onclick="addTableToAnalysis(${n})">
+        <svg class="icon"><use href="#i-plus"/></svg> আরও একটি ছক যোগ করুন
+      </button>
     </div>`;
   $('analysis-container').appendChild(a);
   if (data.type) a.querySelector('.analysis-type-input').value = data.type;
-  // Rebuild editable table after DOM insertion (must be after appendChild)
-  if (hasTable) setTimeout(() => rebuildEditableTable(n), 50);
+  // Build tables after DOM insertion
+  if (hasTable) {
+    setTimeout(() => {
+      const existingTables = data.tables || [];
+      if (existingTables.length === 0) {
+        // First time: add a default table 1
+        addTableToAnalysis(n, {tableNum: 1, rows: data.tableRows||3, cols: data.tableCols||3, caption: data.tableCaption||'', tableData: data.tableData||''});
+      } else {
+        existingTables.forEach((t, ti) => addTableToAnalysis(n, t));
+      }
+    }, 50);
+  }
 }
 
 function toggleAnalysisFields(sel, n){
@@ -2656,11 +2801,26 @@ async function saveBook(){
       if (!item.imgData && !item.imgUrl && !item.body) return;
     }
     if (type === 'table'){
-      item.tableRows = g.querySelector('.analysis-table-rows')?.value || '3';
-      item.tableCols = g.querySelector('.analysis-table-cols')?.value || '3';
-      item.tableData = (g.querySelector('.analysis-table-data')?.value || '').trim();
-      item.tableCaption = (g.querySelector('.analysis-table-caption')?.value || '').trim();
-      if (!item.tableData) return;
+      // Collect all dynamic tables
+      const tableBlocks = g.querySelectorAll('.analysis-table-block');
+      const tables = [];
+      tableBlocks.forEach((block, i) => {
+        const tableNum = i + 1;
+        const tableData = (block.querySelector('.tbl-data')?.value || '').trim();
+        const rows = block.querySelector('.tbl-rows')?.value || '3';
+        const cols = block.querySelector('.tbl-cols')?.value || '3';
+        const caption = (block.querySelector('.tbl-caption')?.value || '').trim();
+        if (tableData) tables.push({ tableNum, rows, cols, caption, tableData });
+      });
+      item.tables = tables;
+      // Backward compatibility: first table also stored at root
+      if (tables.length > 0) {
+        item.tableData = tables[0].tableData;
+        item.tableCaption = tables[0].caption;
+        item.tableRows = tables[0].rows;
+        item.tableCols = tables[0].cols;
+      }
+      if (tables.length === 0) return;
     }
     analyses.push(item);
   });
@@ -2881,19 +3041,41 @@ function exportPDF(){
   .ico{display:inline-block;vertical-align:middle}
   
   /* PDF MODERN QUOTE */
-  .rich-quote{
-    position:relative;margin:20px auto;padding:24px 30px 22px 50px;max-width:90%;
-    background:linear-gradient(135deg,rgba(184,147,90,.08),rgba(139,94,60,.04));
-    border-left:4px solid #8B5E3C;border-radius:0 12px 12px 0;
-    font-family:'Noto Serif Bengali',serif;font-style:italic;
-    font-size:11pt;line-height:1.85;color:#5A4E45;
+  .rich-quote {
+    position: relative; margin: 28px 0; padding: 0; width: 100%;
+    font-family: 'Noto Serif Bengali', serif; font-style: italic;
+    font-size: 11.5pt; line-height: 1.95; overflow: hidden;
+    border-radius: 14px;
   }
-  .rich-quote::before{
-    content:'"';position:absolute;left:14px;top:-6px;
-    font-family:Georgia,serif;font-size:42pt;color:#8B5E3C;
-    line-height:1;opacity:.5;font-style:normal;
+  .rich-quote::before { display:none; }
+  .rich-quote::after  { display:none; }
+
+  /* #Q — left-aligned */
+  .quote-text-left {
+    text-align: left;
+    background: linear-gradient(120deg, #FFF8EE 0%, #FDF5F0 100%);
+    border-left: 5px solid #8B5E3C;
+    border-radius: 0 14px 14px 0;
+    padding: 22px 28px 22px 24px;
+    box-shadow: 0 4px 20px rgba(139,94,60,.08);
+    color: #3B2E28;
   }
-  
+
+  /* #QM — center-aligned */
+  .quote-text-center {
+    text-align: center;
+    background: linear-gradient(160deg, #E8F5F0 0%, #F0FAF7 100%);
+    border-top: 4px solid #2A9D8F;
+    border-bottom: 4px solid #2A9D8F;
+    border-radius: 14px;
+    padding: 26px 36px;
+    box-shadow: 0 4px 20px rgba(42,157,143,.08);
+    color: #1F4F45;
+  }
+
+  .rich-quote p { margin: 0 0 8px 0 !important; padding: 0 !important; text-indent: 0 !important; text-align: inherit !important; }
+  .rich-quote p:last-child { margin-bottom: 0 !important; }
+
   /* PDF MODERN TABLE — full width, colorful */
   .analysis-table-wrap{margin:20px 0;width:100%}
   .analysis-table-caption{font-size:10.5pt;font-weight:600;color:#8B5E3C;text-align:left;padding:0 4px 10px;font-family:'Noto Sans Bengali',sans-serif;line-height:1.5}
