@@ -405,51 +405,51 @@
   
   /* RICH QUOTE */
   .rich-quote {
-    position: relative; margin: 24px 0; padding: 0; width: 100%;
+    position: relative; margin: 28px 0; padding: 0; width: 100%;
     font-family: 'Noto Serif Bengali', serif; font-style: italic;
-    font-size: 11pt; line-height: 1.85; overflow: hidden;
+    font-size: 11.5pt; line-height: 1.95; overflow: hidden;
+    border-radius: 14px;
   }
+  .rich-quote::before { display: none; }
+  .rich-quote::after  { display: none; }
 
-  /* #Q — left-aligned */
+  /* #Q — left-aligned, accent stripe left, warm tint */
   .quote-text-left {
     text-align: left;
-    background: #FDF9F3;
-    border-left: 4px solid #D4A017;
-    border-radius: 0 8px 8px 0;
-    padding: 18px 24px 18px 36px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    color: #3C352D;
-    position: relative;
+    background: linear-gradient(120deg, #FFF8EE 0%, #FDF5F0 100%);
+    border-left: 5px solid var(--accent);
+    border-radius: 0 14px 14px 0;
+    padding: 22px 28px 22px 24px;
+    box-shadow: 0 4px 20px rgba(139,94,60,.08);
   }
   .quote-text-left::before {
-    content: '“';
-    position: absolute; left: 12px; top: 8px;
-    font-family: Georgia, serif; font-size: 34pt;
-    color: #D4A017; opacity: 0.35; font-style: normal;
+    content: '"';
+    display: block; position: absolute; top: 8px; left: 20px;
+    font-family: Georgia, serif; font-size: 48pt; line-height: 1;
+    color: var(--accent); opacity: 0.18; font-style: normal;
     pointer-events: none;
   }
 
-  /* #QM — center-aligned */
+  /* #QM — center-aligned, top+bottom gradient bar, teal tint */
   .quote-text-center {
     text-align: center;
-    background: #F3FAF8;
-    border-top: 1.5px dashed #2A9D8F;
-    border-bottom: 1.5px dashed #2A9D8F;
-    border-radius: 8px;
-    padding: 22px 32px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    color: #1B4D42;
-    position: relative;
+    background: linear-gradient(160deg, #E8F5F0 0%, #F0FAF7 100%);
+    border-top: 4px solid #2A9D8F;
+    border-bottom: 4px solid #2A9D8F;
+    border-radius: 14px;
+    padding: 26px 36px;
+    box-shadow: 0 4px 20px rgba(42,157,143,.08);
+    color: #1F4F45;
   }
   .quote-text-center::before {
-    content: '“';
-    display: block; text-align: center; margin-bottom: -8px;
-    font-family: Georgia, serif; font-size: 30pt;
-    color: #2A9D8F; opacity: 0.4; font-style: normal;
+    content: '"';
+    display: block; text-align: center; width: 100%;
+    font-family: Georgia, serif; font-size: 40pt; line-height: 1;
+    color: #2A9D8F; opacity: 0.25; font-style: normal; margin-bottom: -10px;
     pointer-events: none;
   }
 
-  .rich-quote p { margin: 0 0 6px 0 !important; padding: 0 !important; text-indent: 0 !important; text-align: inherit !important; }
+  .rich-quote p { margin: 0 0 8px 0 !important; padding: 0 !important; text-indent: 0 !important; text-align: inherit !important; }
   .rich-quote p:last-child { margin-bottom: 0 !important; }
 
   .page blockquote{margin:14px 0;padding:12px 18px;border-left:3px solid var(--accent);background:rgba(139,94,60,.04);border-radius:0 6px 6px 0;font-style:italic}
@@ -466,7 +466,7 @@
   .author-detail dd{color:#5A4E45}
   .analysis-box{background:rgba(92,122,94,.06);border:1px solid rgba(92,122,94,.2);border-radius:7px;padding:14px 18px;margin:14px 0}
   .analysis-box-title{font-size:10.5pt;font-weight:700;color:var(--green);margin-bottom:6px;display:flex;align-items:center;gap:6px}
-  .analysis-box p{font-size:10pt;color:#5A4E45}
+  .analysis-box p{font-size:10pt;color:#5A4E45;text-align:justify}
   .analysis-box.blue-box{background:rgba(74,109,124,.06);border-color:rgba(74,109,124,.2)}
   .analysis-box.blue-box .analysis-box-title{color:var(--blue)}
   .analysis-box.red-box{background:rgba(158,74,74,.06);border-color:rgba(158,74,74,.2)}
@@ -2150,21 +2150,49 @@ function parseRichText(text, a = null){
   let quoteIndex = 0;
   const quotePlaceholders = [];
   
-  // Notice we use [\s\S]*? to match across newlines.
-  // The block will be center-aligned as a whole (margin: 0 auto),
-  // but #QM centers the text, #Q keeps text left-aligned.
   processedText = processedText.replace(/#(QM|Q)\s+([\s\S]*?)\s+#\1/g, (match, mode, content) => {
     const placeholder = `__QUOTE_${quoteIndex}__`;
     const isMiddleAligned = mode === 'QM';
-    
-    // Convert newlines in the quote to <br> tags so line breaks are preserved
     const formattedContent = parseRichTextInline(content.trim()).replace(/\n/g, '<br>');
-    
     quotePlaceholders.push({
       placeholder: placeholder,
       content: `<blockquote class="rich-quote ${isMiddleAligned ? 'quote-text-center' : 'quote-text-left'}">${formattedContent}</blockquote>`
     });
     quoteIndex++;
+    return '\n' + placeholder + '\n';
+  });
+
+  // 1.5 Process block placeholders for #R, #B, #G
+  let blockIndex = 0;
+  const blockPlaceholders = [];
+  
+  processedText = processedText.replace(/#R([\s\S]*?)#R/g, (match, content) => {
+    const placeholder = `__BLOCK_RED_${blockIndex}__`;
+    blockPlaceholders.push({ 
+      placeholder: placeholder, 
+      content: `<div class="analysis-box red-box" style="margin:16px 0"><div class="analysis-box-title"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg> গুরুত্বপূর্ণ তথ্য</div><div style="font-size:10.5pt;color:var(--ink-light);line-height:1.85">${parseRichTextInline(content.trim()).replace(/\n/g, '<br>')}</div></div>` 
+    });
+    blockIndex++;
+    return '\n' + placeholder + '\n';
+  });
+
+  processedText = processedText.replace(/#B([\s\S]*?)#B/g, (match, content) => {
+    const placeholder = `__BLOCK_BLUE_${blockIndex}__`;
+    blockPlaceholders.push({ 
+      placeholder: placeholder, 
+      content: `<div class="analysis-box blue-box" style="margin:16px 0"><div class="analysis-box-title"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg> তথ্য / নোট</div><div style="font-size:10.5pt;color:var(--ink-light);line-height:1.85">${parseRichTextInline(content.trim()).replace(/\n/g, '<br>')}</div></div>` 
+    });
+    blockIndex++;
+    return '\n' + placeholder + '\n';
+  });
+
+  processedText = processedText.replace(/#G([\s\S]*?)#G/g, (match, content) => {
+    const placeholder = `__BLOCK_GREEN_${blockIndex}__`;
+    blockPlaceholders.push({ 
+      placeholder: placeholder, 
+      content: `<div class="analysis-box" style="margin:16px 0"><div class="analysis-box-title"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg> বিশ্লেষণ</div><div style="font-size:10.5pt;color:var(--ink-light);line-height:1.85">${parseRichTextInline(content.trim()).replace(/\n/g, '<br>')}</div></div>` 
+    });
+    blockIndex++;
     return '\n' + placeholder + '\n';
   });
 
@@ -2191,6 +2219,15 @@ function parseRichText(text, a = null){
       if (inUl) { html += '</ul>'; inUl = false; }
       if (inOl) { html += '</ol>'; inOl = false; }
       const placeholderData = quotePlaceholders.find(p => line === p.placeholder);
+      if (placeholderData) html += placeholderData.content;
+      continue;
+    }
+    
+    // Check for block placeholders
+    if (line.startsWith('__BLOCK_')) {
+      if (inUl) { html += '</ul>'; inUl = false; }
+      if (inOl) { html += '</ol>'; inOl = false; }
+      const placeholderData = blockPlaceholders.find(p => line === p.placeholder);
       if (placeholderData) html += placeholderData.content;
       continue;
     }
@@ -3041,7 +3078,7 @@ function exportPDF(){
   .author-detail dd{color:#5A4E45}
   .analysis-box{background:rgba(92,122,94,.06);border:1px solid rgba(92,122,94,.2);border-radius:7px;padding:14px 18px;margin:14px 0}
   .analysis-box-title{font-size:10.5pt;font-weight:700;color:#5C7A5E;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-  .analysis-box p{font-size:10pt;color:#5A4E45;text-indent:0}
+  .analysis-box p{font-size:10pt;color:#5A4E45;text-indent:0;text-align:justify}
   .analysis-box.blue-box{background:rgba(74,109,124,.06);border-color:rgba(74,109,124,.2)}
   .analysis-box.blue-box .analysis-box-title{color:#4A6D7C}
   .analysis-box.red-box{background:rgba(158,74,74,.06);border-color:rgba(158,74,74,.2)}
@@ -3058,49 +3095,38 @@ function exportPDF(){
   
   /* PDF MODERN QUOTE */
   .rich-quote {
-    position: relative; margin: 24px 0; padding: 0; width: 100%;
+    position: relative; margin: 28px 0; padding: 0; width: 100%;
     font-family: 'Noto Serif Bengali', serif; font-style: italic;
-    font-size: 11pt; line-height: 1.85; overflow: hidden;
+    font-size: 11.5pt; line-height: 1.95; overflow: hidden;
+    border-radius: 14px;
   }
+  .rich-quote::before { display:none; }
+  .rich-quote::after  { display:none; }
 
   /* #Q — left-aligned */
   .quote-text-left {
     text-align: left;
-    background: #FDF9F3;
-    border-left: 4px solid #D4A017;
-    border-radius: 0 8px 8px 0;
-    padding: 18px 24px 18px 36px;
-    color: #3C352D;
-    position: relative;
-  }
-  .quote-text-left::before {
-    content: '“';
-    position: absolute; left: 12px; top: 8px;
-    font-family: Georgia, serif; font-size: 34pt;
-    color: #D4A017; opacity: 0.35; font-style: normal;
-    pointer-events: none;
+    background: linear-gradient(120deg, #FFF8EE 0%, #FDF5F0 100%);
+    border-left: 5px solid #8B5E3C;
+    border-radius: 0 14px 14px 0;
+    padding: 22px 28px 22px 24px;
+    box-shadow: 0 4px 20px rgba(139,94,60,.08);
+    color: #3B2E28;
   }
 
   /* #QM — center-aligned */
   .quote-text-center {
     text-align: center;
-    background: #F3FAF8;
-    border-top: 1.5px dashed #2A9D8F;
-    border-bottom: 1.5px dashed #2A9D8F;
-    border-radius: 8px;
-    padding: 22px 32px;
-    color: #1B4D42;
-    position: relative;
-  }
-  .quote-text-center::before {
-    content: '“';
-    display: block; text-align: center; margin-bottom: -8px;
-    font-family: Georgia, serif; font-size: 30pt;
-    color: #2A9D8F; opacity: 0.4; font-style: normal;
-    pointer-events: none;
+    background: linear-gradient(160deg, #E8F5F0 0%, #F0FAF7 100%);
+    border-top: 4px solid #2A9D8F;
+    border-bottom: 4px solid #2A9D8F;
+    border-radius: 14px;
+    padding: 26px 36px;
+    box-shadow: 0 4px 20px rgba(42,157,143,.08);
+    color: #1F4F45;
   }
 
-  .rich-quote p { margin: 0 0 6px 0 !important; padding: 0 !important; text-indent: 0 !important; text-align: inherit !important; }
+  .rich-quote p { margin: 0 0 8px 0 !important; padding: 0 !important; text-indent: 0 !important; text-align: inherit !important; }
   .rich-quote p:last-child { margin-bottom: 0 !important; }
 
   /* PDF MODERN TABLE — full width, colorful */
