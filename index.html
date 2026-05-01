@@ -2824,33 +2824,14 @@ async function saveBook(){
       tableBlocks.forEach((block, i) => {
         const tableNum = i + 1;
         const tableData = (block.querySelector('.tbl-data')?.value || '').trim();
-        if (!tableData) return;
         const rows = block.querySelector('.tbl-rows')?.value || '3';
         const cols = block.querySelector('.tbl-cols')?.value || '3';
         const caption = (block.querySelector('.tbl-caption')?.value || '').trim();
-        tables.push({ tableNum, rows, cols, caption, tableData });
+        if (tableData) tables.push({ tableNum, rows, cols, caption, tableData });
       });
-      // If DOM has no tables, preserve original data from editingAuthorName context
-      if (tables.length === 0 && editingBookId) {
-        const original = books.find(x => x.id === editingBookId);
-        if (original) {
-          const origAnalysis = original.analyses?.find(a => a.title === title);
-          if (origAnalysis?.tables?.length) {
-            item.tables = origAnalysis.tables;
-            item.tableData = origAnalysis.tableData || origAnalysis.tables[0]?.tableData || '';
-            item.tableCaption = origAnalysis.tableCaption || origAnalysis.tables[0]?.caption || '';
-            item.tableRows = origAnalysis.tableRows || origAnalysis.tables[0]?.rows || '3';
-            item.tableCols = origAnalysis.tableCols || origAnalysis.tables[0]?.cols || '3';
-          } else if (origAnalysis?.tableData) {
-            item.tables = [{ tableNum:1, rows: origAnalysis.tableRows||'3', cols: origAnalysis.tableCols||'3', caption: origAnalysis.tableCaption||'', tableData: origAnalysis.tableData }];
-            item.tableData = origAnalysis.tableData;
-            item.tableCaption = origAnalysis.tableCaption || '';
-            item.tableRows = origAnalysis.tableRows || '3';
-            item.tableCols = origAnalysis.tableCols || '3';
-          }
-        }
-      } else if (tables.length > 0) {
-        item.tables = tables;
+      item.tables = tables;
+      // Backward compatibility: first table also stored at root
+      if (tables.length > 0) {
         item.tableData = tables[0].tableData;
         item.tableCaption = tables[0].caption;
         item.tableRows = tables[0].rows;
