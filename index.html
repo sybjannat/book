@@ -2175,8 +2175,7 @@ function parseRichText(text, a = null){
   let inOl = false;
   let olType = '1';
   
-  let renderedTable1 = false;
-  let renderedTable2 = false;
+  const renderedTables = {};
   let renderedImage = false;
 
   for (let i = 0; i < lines.length; i++){
@@ -2197,7 +2196,7 @@ function parseRichText(text, a = null){
     }
     
     // Check for table insertion markers (#T, #T1, #T2 ... #Tn)
-    const tMatch = line.match(/^#T(\d*)$/);
+    const tMatch = line.match(/^#T(\d*)$/i);
     if (tMatch) {
       const tNum = tMatch[1] ? parseInt(tMatch[1]) : 1;
       const tHTML = tablesMap[tNum];
@@ -2205,8 +2204,7 @@ function parseRichText(text, a = null){
         if (inUl) { html += '</ul>'; inUl = false; }
         if (inOl) { html += '</ol>'; inOl = false; }
         html += tHTML;
-        if (tNum === 1) renderedTable1 = true;
-        if (tNum === 2) renderedTable2 = true;
+        renderedTables[tNum] = true;
         continue;
       }
     }
@@ -2250,7 +2248,27 @@ function parseRichText(text, a = null){
     if (inUl) { html += '</ul>'; inUl = false; }
     if (inOl) { html += '</ol>'; inOl = false; }
     
-    html += `<p>${parseRichTextInline(line)}</p>`;
+    // Check for inline #T1 or #T markers in line
+    let parsedLine = parseRichTextInline(line);
+    Object.keys(tablesMap).forEach(k => {
+      const kn = parseInt(k);
+      const marker = kn === 1 ? '#T1' : `#T${kn}`;
+      if (parsedLine.includes(marker)) {
+        parsedLine = parsedLine.replace(marker, tablesMap[k]);
+        renderedTables[kn] = true;
+      }
+    });
+    // Support generic #T as table 1
+    if (parsedLine.includes('#T') && tablesMap[1] && !renderedTables[1]) {
+      parsedLine = parsedLine.replace('#T', tablesMap[1]);
+      renderedTables[1] = true;
+    }
+    if (parsedLine.includes('#P') && imageHTML && !renderedImage) {
+      parsedLine = parsedLine.replace('#P', imageHTML);
+      renderedImage = true;
+    }
+    
+    html += `<p>${parsedLine}</p>`;
   }
   
   if (inUl) html += '</ul>';
@@ -2259,8 +2277,7 @@ function parseRichText(text, a = null){
   // Append any unused tables (fallback if no #T markers in body)
   Object.keys(tablesMap).forEach(k => {
     const kn = parseInt(k);
-    if (kn === 1 && renderedTable1) return;
-    if (kn === 2 && renderedTable2) return;
+    if (renderedTables[kn]) return;
     html += tablesMap[k];
   });
   if (imageHTML && !renderedImage) html = imageHTML + html;
@@ -2820,7 +2837,6 @@ async function saveBook(){
         item.tableRows = tables[0].rows;
         item.tableCols = tables[0].cols;
       }
-      if (tables.length === 0) return;
     }
     analyses.push(item);
   });
