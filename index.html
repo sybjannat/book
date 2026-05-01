@@ -3223,12 +3223,21 @@ ${renderEssayPages(essays, critiques.length + 1)}
 
   const blob = new Blob([pdfHTML], {type:'text/html'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'sahitya-somalochona-pdf-' + new Date().toISOString().slice(0,10) + '.html';
-  a.click();
+  const win = window.open(url, '_blank');
+  if (win) {
+    win.onload = () => {
+      win.focus();
+      win.print();
+    };
+  } else {
+    // Fallback if popup is blocked
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sahitya-somalochona-pdf-' + new Date().toISOString().slice(0,10) + '.html';
+    a.click();
+  }
   URL.revokeObjectURL(url);
-  toast('PDF-ready HTML ফাইল রপ্তানি সম্পন্ন! ব্রাউজারে খুলে Print > Save as PDF নির্বাচন করুন।', 'success');
+  toast('PDF-ready HTML ফাইল রপ্তানি সম্পন্ন।', 'success');
 }
 
 async function importData(e){
