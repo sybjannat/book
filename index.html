@@ -555,24 +555,36 @@
   .editor-footer-info{font-size:11.5px;color:var(--ink-lighter);font-family:'Noto Sans Bengali',sans-serif}
 
   /* ===== AUTHORS VIEW ===== */
-  .authors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-  .author-card{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:all .2s}
-  .author-card:hover{border-color:var(--accent-light);box-shadow:var(--shadow);transform:translateY(-2px)}
-  .author-card-top{padding:16px 18px;background:linear-gradient(135deg,var(--bg-soft),var(--bg-elev));border-bottom:1px solid var(--border-soft);display:flex;align-items:center;gap:14px}
-  .author-avatar{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Noto Serif Bengali',serif;font-weight:700;font-size:16px;flex-shrink:0}
-  .author-card-name{font-size:14px;font-weight:700;color:var(--ink);font-family:'Noto Sans Bengali',sans-serif;margin-bottom:1px}
-  .author-card-meta{font-size:11px;color:var(--ink-lighter);font-family:'Noto Sans Bengali',sans-serif}
-  .author-card-body{padding:14px 18px}
-  .author-detail-row{display:flex;gap:6px;margin-bottom:8px;font-size:11.5px}
-  .author-detail-label{font-weight:600;color:var(--accent);min-width:55px;font-family:'Noto Sans Bengali',sans-serif}
+  .authors-list-container{display:flex;flex-direction:column;gap:10px}
+  .author-list-item{background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .15s}
+  .author-list-item:hover{border-color:var(--accent-light);background:var(--bg-soft);transform:translateX(2px)}
+  .author-list-info{display:flex;align-items:center;gap:14px}
+  .author-avatar{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Noto Serif Bengali',serif;font-weight:700;font-size:15px;flex-shrink:0}
+  .author-list-name{font-size:14px;font-weight:700;color:var(--ink);font-family:'Noto Sans Bengali',sans-serif}
+  .author-list-dates{font-size:12px;color:var(--ink-lighter);font-family:'Noto Sans Bengali',sans-serif;margin-top:2px}
+  .author-detail-row{display:flex;gap:8px;margin-bottom:8px;font-size:12px}
+  .author-detail-label{font-weight:600;color:var(--accent);min-width:65px;font-family:'Noto Sans Bengali',sans-serif}
   .author-detail-value{color:var(--ink-light);font-family:'Noto Sans Bengali',sans-serif;flex:1;line-height:1.5}
-  .author-book-list{padding:10px 18px 14px;border-top:1px solid var(--border-soft)}
-  .author-book-list-title{font-size:10.5px;font-weight:600;color:var(--ink-lighter);margin-bottom:8px;font-family:'Noto Sans Bengali',sans-serif}
-  .author-book-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;transition:background .15s;font-size:11.5px;font-family:'Noto Sans Bengali',sans-serif}
-  .author-book-item:hover{background:var(--bg-soft)}
-  .author-book-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
-  .author-book-item-title{color:var(--ink);font-weight:600}
-  .author-book-item-mode{font-size:10px;color:var(--ink-lighter);margin-left:auto}
+
+  /* ===== ADJUSTABLE DRAWER ===== */
+  .author-drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:20000;backdrop-filter:blur(2px)}
+  .author-drawer-overlay.show{display:block}
+  .author-drawer{
+    position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);
+    width:100%;max-width:720px;height:65vh;min-height:25vh;max-height:95vh;
+    background:var(--bg-elev);border-radius:18px 18px 0 0;
+    box-shadow:0 -10px 40px rgba(0,0,0,0.15);z-index:20001;
+    display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.22,1,.36,1);
+  }
+  .author-drawer.show{transform:translateX(-50%) translateY(0)}
+  .author-drawer-resize-bar{
+    width:100%;height:22px;display:flex;align-items:center;justify-content:center;cursor:ns-resize;user-select:none;flex-shrink:0;
+    border-bottom:1px solid var(--border-soft);background:var(--bg-soft);border-radius:18px 18px 0 0;
+  }
+  .author-drawer-handle{width:40px;height:4px;background:var(--ink-mute);border-radius:2px}
+  .author-drawer-header{padding:14px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-soft);flex-shrink:0}
+  .author-drawer-body{padding:22px;overflow-y:auto;flex:1}
+
 
   /* ===== AUTHOR DROPDOWN ===== */
   .author-dropdown-wrap{position:relative}
@@ -680,6 +692,27 @@
   #splash-screen.hide {
     opacity: 0;
     pointer-events: none;
+  }
+
+  /* ===== FULL-SCREEN LOGIN PAGE (RESPONSIVE) ===== */
+  .auth-overlay-container {
+    position: fixed; inset: 0; z-index: 21000;
+    background: linear-gradient(135deg, #FAF7F2 0%, #F4EFE6 50%, #E8E0D4 100%);
+    display: none; align-items: center; justify-content: center;
+    padding: 16px; overflow-y: auto;
+  }
+  .auth-modal-card {
+    width: 100%; max-width: 420px;
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 16px; box-shadow: var(--shadow-lg);
+    overflow: hidden; font-family: 'Noto Sans Bengali', sans-serif;
+    margin: auto; /* Ensures centering when content overflows height */
+  }
+  @media (max-width: 480px) {
+    .auth-overlay-container { padding: 10px; }
+    .auth-modal-card { border-radius: 12px; }
+    .auth-modal-card > div:first-child { padding: 18px 16px !important; }
+    .auth-modal-card > div:last-child { padding: 18px 16px !important; }
   }
 
   /* ===== MOBILE & DEVICE RESPONSIVE ===== */
@@ -879,6 +912,13 @@
       </button>
     </div>
 
+    <!-- Hidden auth state elements (not visible in sidebar) -->
+    <div id="nav-login-btn" style="display:none"></div>
+    <div id="nav-user-profile" style="display:none">
+      <span id="user-avatar-lbl"></span>
+      <span id="user-email-lbl"></span>
+    </div>
+
     <div class="sidebar-section">
       <div class="sidebar-label">System</div>
       <button class="nav-item" data-view="settings" onclick="navigate('settings')">
@@ -888,13 +928,17 @@
     </div>
 
     <div class="sidebar-footer">
+      <button class="nav-item" onclick="handleLogout()" style="color: var(--red); background: var(--red-soft); margin-bottom: 12px; font-weight: 600;">
+        <svg class="icon icon-md"><use href="#i-arrow-right"/></svg>
+        <span>লগআউট</span>
+      </button>
       <div class="footer-card">
         <div class="footer-card-icon">
           <svg class="icon icon-md"><use href="#i-info"/></svg>
         </div>
         <div class="footer-card-text">
           <b>v১.০</b>
-          বাংলা সাহিত্য সমালোচনা অ্যাপ
+          সাহিত্য সমালোচনা অ্যাপ
         </div>
       </div>
     </div>
@@ -984,7 +1028,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel admin-only">
           <div class="panel-header">
             <svg class="icon icon-md" style="color:var(--accent)"><use href="#i-target"/></svg>
             <div class="panel-title">দ্রুত কাজ</div>
@@ -1202,89 +1246,141 @@
         <p class="view-subtitle">অ্যাপ্লিকেশনের কনফিগারেশন ও ডেটা ব্যবস্থাপনা।</p>
       </div>
 
-      <!-- CLOUD SYNC SECTION -->
+      <!-- USER PROFILE SECTION -->
       <div class="settings-section">
         <div class="settings-card">
-          <div style="display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--border-soft);margin-bottom:8px">
-            <div style="width:36px;height:36px;border-radius:8px;background:rgba(74,109,124,.1);color:var(--blue);display:flex;align-items:center;justify-content:center">
-              <svg class="icon icon-md"><use href="#i-cloud"/></svg>
+          <div style="display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--border-soft);margin-bottom:12px">
+            <div style="width:36px;height:36px;border-radius:8px;background:rgba(139,94,60,.1);color:var(--accent);display:flex;align-items:center;justify-content:center">
+              <svg class="icon icon-md"><use href="#i-user"/></svg>
             </div>
             <div style="flex:1">
-              <div class="settings-row-title">ক্লাউড সিঙ্ক (Supabase)</div>
-              <div class="settings-row-desc">সকল ডেটা স্বয়ংক্রিয়ভাবে ক্লাউডে সংরক্ষিত ও সিঙ্ক হয়</div>
-            </div>
-            <div id="settings-sync-status" class="sync-badge">
-              <svg class="icon icon-md"><use href="#i-loader"/></svg>
-              <span>সংযোগ পরীক্ষা...</span>
+              <div class="settings-row-title">ব্যবহারকারী প্রোফাইল</div>
+              <div class="settings-row-desc">আপনার ব্যক্তিগত তথ্য ও পছন্দসমূহ</div>
             </div>
           </div>
           <div class="settings-row">
             <div class="settings-row-info">
-              <div class="settings-row-title">এখনই সিঙ্ক করুন</div>
-              <div class="settings-row-desc">ক্লাউড থেকে সর্বশেষ ডেটা টেনে নিন</div>
+              <div class="settings-row-title">নাম</div>
+              <div class="settings-row-desc" id="user-profile-name">-</div>
             </div>
-            <button class="btn btn-outline" onclick="syncFromCloud()">
-              <svg class="icon icon-sm"><use href="#i-refresh"/></svg>
-              <span>রিফ্রেশ</span>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info">
+              <div class="settings-row-title">ইমেইল</div>
+              <div class="settings-row-desc" id="user-profile-email">-</div>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info">
+              <div class="settings-row-title">ফোন নম্বর</div>
+              <div class="settings-row-desc" id="user-profile-phone">-</div>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info">
+              <div class="settings-row-title">অ্যাকাউন্টের ধরন</div>
+              <div class="settings-row-desc" id="user-profile-role">-</div>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-info">
+              <div class="settings-row-title" style="color:var(--red)">সাইন আউট</div>
+              <div class="settings-row-desc">অ্যাকাউন্ট থেকে বের হয়ে যান</div>
+            </div>
+            <button class="btn btn-outline" style="color:var(--red);border-color:var(--red-soft)" onclick="handleLogout()">
+              <svg class="icon icon-sm"><use href="#i-arrow-right"/></svg>
+              <span>সাইন আউট</span>
             </button>
           </div>
         </div>
       </div>
 
-      <div class="settings-section">
-        <div class="settings-card">
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-title">PDF এক্সপোর্ট</div>
-              <div class="settings-row-desc">সকল গ্রন্থ সমালোচনা ও প্রবন্ধ একটি PDF-ready ফাইল হিসেবে ডাউনলোড করুন — সূচীপত্র সহ</div>
+      <!-- ADMIN-ONLY SECTION -->
+      <div id="settings-admin-section" style="display:none">
+
+        <!-- CLOUD SYNC SECTION -->
+        <div class="settings-section">
+          <div class="settings-card">
+            <div style="display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--border-soft);margin-bottom:8px">
+              <div style="width:36px;height:36px;border-radius:8px;background:rgba(74,109,124,.1);color:var(--blue);display:flex;align-items:center;justify-content:center">
+                <svg class="icon icon-md"><use href="#i-cloud"/></svg>
+              </div>
+              <div style="flex:1">
+                <div class="settings-row-title">ক্লাউড সিঙ্ক (Supabase)</div>
+                <div class="settings-row-desc">সকল ডেটা স্বয়ংক্রিয়ভাবে ক্লাউডে সংরক্ষিত ও সিঙ্ক হয়</div>
+              </div>
+              <div id="settings-sync-status" class="sync-badge">
+                <svg class="icon icon-md"><use href="#i-loader"/></svg>
+                <span>সংযোগ পরীক্ষা...</span>
+              </div>
             </div>
-            <button class="btn btn-primary" onclick="exportPDF()">
-              <svg class="icon icon-sm"><use href="#i-file-text"/></svg>
-              <span>PDF রপ্তানি</span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-title">ডেটা এক্সপোর্ট</div>
-              <div class="settings-row-desc">সমস্ত গ্রন্থ সমালোচনা JSON ফাইল হিসেবে ডাউনলোড করুন</div>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-title">এখনই সিঙ্ক করুন</div>
+                <div class="settings-row-desc">ক্লাউড থেকে সর্বশেষ ডেটা টেনে নিন</div>
+              </div>
+              <button class="btn btn-outline" onclick="syncFromCloud()">
+                <svg class="icon icon-sm"><use href="#i-refresh"/></svg>
+                <span>রিফ্রেশ</span>
+              </button>
             </div>
-            <button class="btn btn-outline" onclick="exportData()">
-              <svg class="icon icon-sm"><use href="#i-download"/></svg>
-              <span>JSON</span>
-            </button>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-title">ডেটা ইম্পোর্ট</div>
-              <div class="settings-row-desc">JSON ফাইল থেকে গ্রন্থ সমালোচনা পুনরুদ্ধার করুন</div>
-            </div>
-            <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">
-              <svg class="icon icon-sm"><use href="#i-upload"/></svg>
-              <span>ইম্পোর্ট</span>
-            </button>
-            <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
-          </div>
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-title" style="color:var(--red)">সব ডেটা মুছে ফেলুন</div>
-              <div class="settings-row-desc">এই কাজটি অপরিবর্তনীয়। সকল সমালোচনা স্থায়ীভাবে মুছে যাবে।</div>
-            </div>
-            <button class="btn btn-outline" style="color:var(--red);border-color:var(--red-soft)" onclick="clearAllData()">
-              <svg class="icon icon-sm"><use href="#i-trash"/></svg>
-              <span>সব মুছুন</span>
-            </button>
           </div>
         </div>
-      </div>
 
-      <div class="settings-section">
-        <div class="settings-card">
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-title">অ্যাপ্লিকেশন তথ্য</div>
-              <div class="settings-row-desc">সাহিত্য সমালোচনা v১.০ — Bengali Literature Critique App</div>
+        <div class="settings-section">
+          <div class="settings-card">
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-title">PDF এক্সপোর্ট</div>
+                <div class="settings-row-desc">সকল গ্রন্থ সমালোচনা ও প্রবন্ধ একটি PDF-ready ফাইল হিসেবে ডাউনলোড করুন — সূচীপত্র সহ</div>
+              </div>
+              <button class="btn btn-primary" onclick="exportPDF()">
+                <svg class="icon icon-sm"><use href="#i-file-text"/></svg>
+                <span>PDF রপ্তানি</span>
+              </button>
             </div>
-            <svg class="icon icon-lg" style="color:var(--accent)"><use href="#i-globe"/></svg>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-title">ডেটা এক্সপোর্ট</div>
+                <div class="settings-row-desc">সমস্ত গ্রন্থ সমালোচনা JSON ফাইল হিসেবে ডাউনলোড করুন</div>
+              </div>
+              <button class="btn btn-outline" onclick="exportData()">
+                <svg class="icon icon-sm"><use href="#i-download"/></svg>
+                <span>JSON</span>
+              </button>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-title">ডেটা ইম্পোর্ট</div>
+                <div class="settings-row-desc">JSON ফাইল থেকে গ্রন্থ সমালোচনা পুনরুদ্ধার করুন</div>
+              </div>
+              <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">
+                <svg class="icon icon-sm"><use href="#i-upload"/></svg>
+                <span>ইম্পোর্ট</span>
+              </button>
+              <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+            </div>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-title" style="color:var(--red)">সব ডেটা মুছে ফেলুন</div>
+                <div class="settings-row-desc">এই কাজটি অপরিবর্তনীয়। সকল সমালোচনা স্থায়ীভাবে মুছে যাবে।</div>
+              </div>
+              <button class="btn btn-outline" style="color:var(--red);border-color:var(--red-soft)" onclick="clearAllData()">
+                <svg class="icon icon-sm"><use href="#i-trash"/></svg>
+                <span>সব মুছুন</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-card">
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-title">অ্যাপ্লিকেশন তথ্য</div>
+                <div class="settings-row-desc">সাহিত্য সমালোচনা v১.০ — Bengali Literature Critique App</div>
+              </div>
+              <svg class="icon icon-lg" style="color:var(--accent)"><use href="#i-globe"/></svg>
           </div>
         </div>
       </div>
@@ -1295,6 +1391,65 @@
 
 <!-- TOAST -->
 <div id="toast" class="toast"></div>
+
+<!-- AUTHOR DRAWER -->
+<div id="author-drawer-overlay" class="author-drawer-overlay" onclick="closeAuthorDrawer()"></div>
+<div id="author-drawer" class="author-drawer">
+  <div class="author-drawer-resize-bar" id="author-drawer-resize-bar">
+    <div class="author-drawer-handle"></div>
+  </div>
+  <div class="author-drawer-header">
+    <h3 id="drawer-author-title" style="margin:0;font-family:'Noto Sans Bengali',sans-serif;font-size:16px;font-weight:700">লেখক পরিচিতি</h3>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-outline btn-sm icon-btn" id="drawer-edit-btn" style="width:32px;height:32px;padding:0;justify-content:center"><svg class="icon icon-sm"><use href="#i-edit"/></svg></button>
+      <button class="btn btn-ghost btn-sm" onclick="closeAuthorDrawer()" style="width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center"><svg class="icon icon-sm"><use href="#i-x"/></svg></button>
+    </div>
+  </div>
+  <div class="author-drawer-body" id="author-drawer-body"></div>
+</div>
+
+<!-- DEDICATED FULL-SCREEN LOGIN / SIGNUP PAGE -->
+<div id="login-modal-overlay" class="auth-overlay-container">
+  <div id="login-modal" class="auth-modal-card">
+    <div style="background:linear-gradient(135deg,#2C2420,#4A3C30);color:#F0E6D6;padding:24px;text-align:center;position:relative">
+      <div style="width:54px;height:54px;border-radius:12px;background:rgba(255,255,255,0.1);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;color:#fff;border:1px solid rgba(255,255,255,0.2)">
+        <svg class="icon icon-lg" style="stroke:#fff"><use href="#i-feather"/></svg>
+      </div>
+      <h2 style="margin:0 0 4px;font-size:20px;font-weight:800;letter-spacing:.5px" id="auth-modal-title">অ্যাকাউন্ট তৈরি করুন</h2>
+      <p style="margin:0;font-size:11px;color:rgba(240,230,214,.6)">বাংলা সাহিত্য সমালোচনা ও প্রবন্ধ রচনা অ্যাপ</p>
+    </div>
+    <div style="padding:24px">
+      <div style="display:flex;gap:6px;background:var(--bg-soft);padding:4px;border-radius:10px;margin-bottom:20px">
+        <button id="auth-tab-signup" class="btn btn-sm btn-primary" style="flex:1;justify-content:center" onclick="setAuthMode('signup')">নতুন অ্যাকাউন্ট</button>
+        <button id="auth-tab-login" class="btn btn-sm btn-ghost" style="flex:1;justify-content:center" onclick="setAuthMode('login')">লগইন</button>
+      </div>
+      <div id="auth-name-wrap" style="margin-bottom:14px">
+        <label class="form-label">নাম <span class="req">*</span></label>
+        <input type="text" id="auth-name" class="form-input" placeholder="আপনার পুরো নাম">
+      </div>
+      <div id="auth-phone-wrap" style="margin-bottom:14px">
+        <label class="form-label">ফোন নম্বর <span class="req">*</span></label>
+        <input type="tel" id="auth-phone" class="form-input" placeholder="01XXXXXXXXX">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="form-label">ইমেইল ঠিকানা <span class="req">*</span></label>
+        <input type="email" id="auth-email" class="form-input" placeholder="example@syb.com">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="form-label">পাসওয়ার্ড <span class="req">*</span></label>
+        <input type="password" id="auth-password" class="form-input" placeholder="••••••••">
+      </div>
+      <div id="auth-confirm-wrap" style="margin-bottom:20px">
+        <label class="form-label">পাসওয়ার্ড নিশ্চিত করুন <span class="req">*</span></label>
+        <input type="password" id="auth-confirm-password" class="form-input" placeholder="••••••••">
+      </div>
+      <button id="auth-submit-btn" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:12px;padding:12px;font-size:14px;border-radius:10px" onclick="handleAuthSubmit()">অ্যাকাউন্ট তৈরি করুন</button>
+      <div style="font-size:11px;color:var(--ink-lighter);text-align:center;line-height:1.6">
+        অ্যাপ ব্যবহারের জন্য অ্যাকাউন্ট তৈরি বা লগইন করা আবশ্যক।
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ============== SUPABASE CONFIG ==============
@@ -1319,6 +1474,287 @@ let currentFilter = 'all';
 let currentTagFilter = '';
 let editingAuthorName = null;
 let cloudSyncStatus = 'idle'; // idle, syncing, synced, error, offline
+
+// ============== AUTHENTICATION ==============
+let currentUser = null;
+let userProfile = null;
+let isAdmin = false;
+let authMode = 'login'; // Default to login
+let appLocked = true; // App is locked until login
+
+function setAuthMode(mode){
+  authMode = mode;
+  const signup = mode === 'signup';
+  $('auth-modal-title').innerHTML = `<svg class="icon icon-md" style="stroke:#fff"><use href="#i-user"/></svg> ${signup ? 'অ্যাকাউন্ট তৈরি করুন' : 'লগইন করুন'}`;
+  $('auth-tab-signup').className = signup ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-ghost';
+  $('auth-tab-login').className = signup ? 'btn btn-sm btn-ghost' : 'btn btn-sm btn-primary';
+  $('auth-name-wrap').style.display = signup ? 'block' : 'none';
+  $('auth-phone-wrap').style.display = signup ? 'block' : 'none';
+  $('auth-confirm-wrap').style.display = signup ? 'block' : 'none';
+  $('auth-submit-btn').textContent = signup ? 'অ্যাকাউন্ট তৈরি করুন' : 'লগইন করুন';
+}
+
+function openLoginModal(mode='signup'){
+  $('auth-name').value = '';
+  $('auth-phone').value = '';
+  $('auth-email').value = '';
+  $('auth-password').value = '';
+  $('auth-confirm-password').value = '';
+  setAuthMode(mode);
+  // Full-screen view: hide app, show login overlay
+  $('app').style.display = 'none';
+  $('login-modal-overlay').style.display = 'flex';
+}
+
+function closeLoginModal(force=false){
+  if (appLocked && !force) return; // Prevent closing the login page without authentication
+  $('login-modal-overlay').style.display = 'none';
+  $('app').style.display = 'flex';
+}
+
+async function handleAuthSubmit(type=authMode){
+  const name = $('auth-name').value.trim();
+  const phone = $('auth-phone').value.trim();
+  const email = $('auth-email').value.trim();
+  const password = $('auth-password').value.trim();
+  const confirmPassword = $('auth-confirm-password').value.trim();
+
+  if (type === 'signup' && (!name || !phone || !email || !password || !confirmPassword)){
+    toast('নাম, ফোন, ইমেইল, পাসওয়ার্ড ও নিশ্চিত পাসওয়ার্ড পূরণ করুন', 'error');
+    return;
+  }
+  if (type === 'signup' && password !== confirmPassword){
+    toast('পাসওয়ার্ড ও নিশ্চিত পাসওয়ার্ড মিলছে না', 'error');
+    return;
+  }
+  if (type === 'login' && (!email || !password)){
+    toast('ইমেইল ও পাসওয়ার্ড পূরণ করুন', 'error');
+    return;
+  }
+  
+  try {
+    setSyncStatus('syncing', 'প্রবেশ করা হচ্ছে...');
+    if (type === 'login') {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      toast('লগইন সফল হয়েছে!', 'success');
+    } else {
+      const { data, error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            phone,
+            display_name: name
+          }
+        }
+      });
+      if (error) throw error;
+      
+      // Auto-login after signup (no email verification needed)
+      const { data: loginData, error: loginError } = await sb.auth.signInWithPassword({ email, password });
+      if (!loginError) {
+        toast('স্বাগতম! অ্যাকাউন্ট তৈরি ও লগইন সফল।', 'success');
+      } else {
+        toast('অ্যাকাউন্ট তৈরি হয়েছে! ইমেইল দিয়ে লগইন করুন।', 'success');
+        setAuthMode('login');
+        return;
+      }
+    }
+    await checkSession();
+    if (currentUser) await syncFromCloud();
+  } catch (e) {
+    console.error('Auth error:', e);
+    toast(e.message || 'অথেন্টিকেশন ব্যর্থ', 'error');
+    setSyncStatus('error');
+  }
+}
+
+async function handleLogout(){
+  if (!confirm('আপনি কি নিশ্চিত যে সাইন আউট করতে চান?')) return;
+  try {
+    await sb.auth.signOut();
+    toast('সাইন আউট সফল হয়েছে', 'success');
+    checkSession();
+  } catch (e) {
+    console.error('Logout error:', e);
+  }
+}
+
+async function fetchUserProfile(userId){
+  try {
+    let { data, error } = await sb.from('profiles').select('*').eq('id', userId).single();
+    
+    if (error || !data) {
+      // Fallback: If profile doesn't exist, insert it from client side
+      const name = currentUser.user_metadata?.name || currentUser.user_metadata?.display_name || currentUser.email.split('@')[0];
+      const phone = currentUser.user_metadata?.phone || '';
+      const email = currentUser.email;
+      
+      // ONLY 'admin@syb.com' is the super admin by default.
+      // Every other user is registered with 'user' role.
+      const role = (email.toLowerCase() === 'admin@syb.com') ? 'admin' : 'user';
+      
+      const newProfile = {
+        id: userId,
+        name: name,
+        email: email,
+        phone: phone,
+        role: role
+      };
+      
+      const { error: insertErr } = await sb.from('profiles').insert(newProfile);
+      if (!insertErr) {
+        userProfile = newProfile;
+      } else {
+        console.error('Client-side profile insert failed:', insertErr);
+        userProfile = newProfile; // fallback state
+      }
+    } else {
+      userProfile = data;
+    }
+    
+    // Set admin status securely based on profiles role or super admin email
+    isAdmin = userProfile.role === 'admin' || userProfile.email.toLowerCase() === 'admin@syb.com';
+  } catch (e) {
+    console.error('Profile fetch error:', e);
+    userProfile = { id: userId, role: 'user', name: '', email: currentUser.email, phone: '' };
+    isAdmin = false;
+  }
+}
+
+async function checkSession(){
+  if (!sb) return;
+  const { data: { session }, error } = await sb.auth.getSession();
+  
+  if (session && session.user) {
+    currentUser = session.user;
+    await fetchUserProfile(session.user.id);
+    
+    // Unlock app and hide login modal
+    appLocked = false;
+    closeLoginModal(true);
+    $('nav-login-btn').style.display = 'none';
+    $('nav-user-profile').style.display = 'block';
+    
+    // Display elements are removed from sidebar as per request
+    
+    // Show main app
+    showMainApp();
+  } else {
+    // Lock app and show login
+    currentUser = null;
+    userProfile = null;
+    isAdmin = false;
+    appLocked = true;
+    $('nav-login-btn').style.display = 'flex';
+    $('nav-user-profile').style.display = 'none';
+    
+    // Force login modal
+    showAuthView();
+  }
+  
+  // Dynamic UI Access Control based on Admin status
+  updateAccessControlUI();
+}
+
+function showAuthView(){
+  // Hide main app, show login overlay
+  const app = $('app');
+  const authOverlay = $('login-modal-overlay');
+  const authModal = $('login-modal');
+  if (app) app.style.display = 'none';
+  if (authOverlay) authOverlay.style.display = 'flex';
+  if (authModal) authModal.style.display = 'block';
+  // Default to login mode
+  setAuthMode('login');
+}
+
+function showMainApp(){
+  // Hide login, show main app
+  const app = $('app');
+  const authOverlay = $('login-modal-overlay');
+  const authModal = $('login-modal');
+  if (authOverlay) authOverlay.style.display = 'none';
+  if (authModal) authModal.style.display = 'none';
+  if (app) app.style.display = 'flex';
+  // Initialize app state
+  setMode(currentMode);
+  renderDashboard();
+}
+
+async function updateSettingsProfile() {
+  if (userProfile) {
+    $('user-profile-name').textContent = userProfile.name || '-';
+    $('user-profile-email').textContent = userProfile.email || '-';
+    $('user-profile-phone').textContent = userProfile.phone || '-';
+    $('user-profile-role').textContent = isAdmin ? 'অ্যাডমিন' : 'সাধারণ ব্যবহারকারী';
+  }
+}
+
+async function updateAccessControlUI() {
+  const visibleStyle = isAdmin ? 'inline-flex' : 'none';
+  const flexStyle = isAdmin ? 'flex' : 'none';
+  const blockStyle = isAdmin ? 'block' : 'none';
+  
+  // Update user profile in settings
+  await updateSettingsProfile();
+  
+  // Toggle Admin Settings section
+  const adminSection = $('settings-admin-section');
+  if (adminSection) adminSection.style.display = isAdmin ? 'block' : 'none';
+  
+  // Hide Quick Actions for non-admin
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'block' : 'none');
+  
+  // 1. Sidebar workspace restrictions
+  const editorNavItem = document.querySelector('.nav-item[data-view="editor"]');
+  if (editorNavItem) {
+    editorNavItem.style.display = isAdmin ? 'flex' : 'none';
+  }
+  
+  // 2. Topbar action button
+  const topbarNewBtn = document.querySelector('.topbar .new-btn');
+  if (topbarNewBtn) {
+    topbarNewBtn.style.display = visibleStyle;
+  }
+  
+  // 3. Library add card & hover cards
+  const libraryAddCard = document.querySelector('.book-grid-add');
+  if (libraryAddCard) {
+    libraryAddCard.style.display = isAdmin ? 'flex' : 'none';
+  }
+  
+  // 4. Settings restrictions
+  const deleteRow = document.querySelector('.settings-row:has(button[onclick="clearAllData()"])');
+  if (deleteRow) {
+    deleteRow.style.display = isAdmin ? 'flex' : 'none';
+  }
+  const importRow = document.querySelector('.settings-row:has(button[onclick*="import-file"])');
+  if (importRow) {
+    importRow.style.display = isAdmin ? 'flex' : 'none';
+  }
+  
+  // 5. Reader view toolbar edit/delete actions
+  const readerEditBtn = document.querySelector('.reader-toolbar .btn[onclick="editCurrentBook()"]');
+  if (readerEditBtn) readerEditBtn.style.display = visibleStyle;
+  const readerDeleteBtn = document.querySelector('.reader-toolbar .btn[onclick="deleteCurrentBook()"]');
+  if (readerDeleteBtn) readerDeleteBtn.style.display = visibleStyle;
+  
+  // 6. Author drawer edit action
+  const authorEditBtn = $('drawer-edit-btn');
+  if (authorEditBtn) authorEditBtn.style.display = visibleStyle;
+  
+  // 7. Library/dashboard items edit/delete hover controls
+  document.querySelectorAll('.book-actions, .recent-edit').forEach(ctrl => {
+    ctrl.style.display = isAdmin ? 'flex' : 'none';
+  });
+  
+  // Render dashboard / library to capture grid-add card etc.
+  renderDashboard();
+  renderLibrary();
+}
 
 function setSyncStatus(status, msg){
   cloudSyncStatus = status;
@@ -1615,45 +2051,195 @@ function renderAuthorsView(){
     </div>`;
     return;
   }
+
+  let headerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div style="font-size:12px;font-weight:600;color:var(--ink-light);font-family:'Noto Sans Bengali',sans-serif">সর্বমোট লেখক: ${bn(authors.length)} জন (বিস্তারিত দেখতে লিস্টের আইটেমে ক্লিক করুন)</div>
+    <button class="btn btn-primary" onclick="exportAuthorsPDF()" style="padding:8px 18px">
+      <svg class="icon icon-sm"><use href="#i-printer"/></svg>
+      <span>PDF রপ্তানি</span>
+    </button>
+  </div>`;
+  
   const colors = ['linear-gradient(135deg,#8B5E3C,#6B4828)','linear-gradient(135deg,#5C7A5E,#3F5641)','linear-gradient(135deg,#4A6D7C,#2F4955)','linear-gradient(135deg,#9E4A4A,#6F2E2E)','linear-gradient(135deg,#B8935A,#8B6E3C)','linear-gradient(135deg,#6B4F8B,#4A3563)'];
-  container.innerHTML = `<div class="authors-grid">` + authors.map((a, i) => {
+  
+  let listHTML = `<div class="authors-list-container">` + authors.map((a, i) => {
     const grad = colors[i % colors.length];
     const initial = a.authorName.trim().charAt(0);
-    return `<div class="author-card">
-      <div class="author-card-top">
+    return `<div class="author-list-item" onclick="openAuthorDrawer('${a.authorName.replace(/'/g, "\\'")}')">
+      <div class="author-list-info">
         <div class="author-avatar" style="background:${grad}">${initial}</div>
         <div>
-          <div class="author-card-name">${a.authorName}</div>
-          <div class="author-card-meta">${a.authorNameEn || a.authorDates || 'লেখক'}</div>
+          <div class="author-list-name">${a.authorName}</div>
+          <div class="author-list-dates">${a.authorDates || 'জীবনকাল অনির্দিষ্ট'}</div>
         </div>
       </div>
-      ${a.authorDates || a.authorEdu || a.authorAwards ? `<div class="author-card-body">
-        ${a.authorDates ? `<div class="author-detail-row"><span class="author-detail-label">সময়কাল</span><span class="author-detail-value">${a.authorDates}</span></div>` : ''}
-        ${a.authorEdu ? `<div class="author-detail-row"><span class="author-detail-label">শিক্ষা</span><span class="author-detail-value">${a.authorEdu}</span></div>` : ''}
-        ${a.authorAwards ? `<div class="author-detail-row"><span class="author-detail-label">পুরস্কার</span><span class="author-detail-value">${a.authorAwards}</span></div>` : ''}
-      </div>` : ''}
-      ${a.authorBio ? `<div class="author-card-body" style="border-top:1px solid var(--border-soft)">
-        <div class="author-detail-value" style="font-size:11px;line-height:1.7;max-height:60px;overflow:hidden;position:relative">
-          ${a.authorBio.split(/\n/).slice(0,2).join('<br>')}
-          ${a.authorBio.split(/\n/).length > 2 ? '<span style="color:var(--accent);font-weight:600"> আরও...</span>' : ''}
-        </div>
-      </div>` : ''}
-      <div style="padding:10px 18px;border-top:1px solid var(--border-soft);display:flex;justify-content:flex-end">
-        <button class="btn btn-ghost btn-sm" style="gap:4px;font-size:11px;color:var(--accent)" onclick="editAuthor('${a.authorName.replace(/'/g,"\\'")}')">
-          <svg class="icon icon-sm"><use href="#i-edit"/></svg>
-          <span>সম্পাদনা</span>
-        </button>
-      </div>
-      <div class="author-book-list">
-        <div class="author-book-list-title">📖 রচনাবলি (${bn(a.books.length)}টি)</div>
-        ${a.books.map(b => `<div class="author-book-item" onclick="openBook(${b.id})">
-          <div class="author-book-dot"></div>
-          <span class="author-book-item-title">${b.bookName}</span>
-          ${b.pubYear ? `<span class="author-book-item-mode">${b.pubYear}</span>` : ''}
-        </div>`).join('')}
+      <div style="display:flex;align-items:center;gap:12px">
+        ${a.authorNameEn ? `<span style="font-size:11.5px;color:var(--ink-mute);font-family:Georgia,serif;display:inline-block" class="hidden sm:inline">${a.authorNameEn}</span>` : ''}
+        <svg class="icon icon-md" style="color:var(--ink-mute)"><use href="#i-arrow-right"/></svg>
       </div>
     </div>`;
   }).join('') + `</div>`;
+  
+  container.innerHTML = headerHTML + listHTML;
+}
+
+// ============== AUTHOR DRAWER SYSTEMS ==============
+let isDraggingDrawer = false;
+let startY = 0;
+let startHeight = 0;
+
+function initDrawerResize() {
+  const bar = $('author-drawer-resize-bar');
+  const drawer = $('author-drawer');
+  if (!bar || !drawer) return;
+  
+  // Use pointer events for universal mouse + touch support
+  bar.style.cursor = 'ns-resize';
+  bar.style.touchAction = 'none';
+  
+  bar.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    bar.setPointerCapture(e.pointerId);
+    isDraggingDrawer = true;
+    startY = e.clientY;
+    startHeight = drawer.offsetHeight;
+    drawer.style.transition = 'none';
+  });
+  
+  bar.addEventListener('pointermove', (e) => {
+    if (!isDraggingDrawer) return;
+    const deltaY = startY - e.clientY;
+    const newHeight = startHeight + deltaY;
+    const maxHeight = window.innerHeight * 0.95;
+    const minHeight = 150;
+    if (newHeight >= minHeight && newHeight <= maxHeight) {
+      drawer.style.height = newHeight + 'px';
+    }
+  });
+  
+  const endDrag = () => {
+    if (!isDraggingDrawer) return;
+    isDraggingDrawer = false;
+    drawer.style.transition = 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)';
+  };
+  
+  bar.addEventListener('pointerup', endDrag);
+  bar.addEventListener('pointercancel', endDrag);
+  bar.addEventListener('lostpointercapture', endDrag);
+}
+
+function openAuthorDrawer(name) {
+  const authors = getUniqueAuthors();
+  const a = authors.find(x => x.authorName === name);
+  if (!a) return;
+  
+  $('drawer-author-title').textContent = a.authorName;
+  
+  let bodyHTML = '';
+  if (a.authorNameEn) {
+    bodyHTML += `<div style="font-family:Georgia,serif;font-size:13px;color:var(--ink-lighter);margin-bottom:14px">${a.authorNameEn}</div>`;
+  }
+  
+  if (a.authorDates || a.authorEdu || a.authorAwards) {
+    bodyHTML += `<div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:18px">`;
+    if (a.authorDates) bodyHTML += `<div class="author-detail-row"><span class="author-detail-label">সময়কাল</span><span class="author-detail-value">${a.authorDates}</span></div>`;
+    if (a.authorEdu) bodyHTML += `<div class="author-detail-row"><span class="author-detail-label">শিক্ষা</span><span class="author-detail-value">${a.authorEdu}</span></div>`;
+    if (a.authorAwards) bodyHTML += `<div class="author-detail-row"><span class="author-detail-label">পুরস্কার</span><span class="author-detail-value">${a.authorAwards}</span></div>`;
+    bodyHTML += `</div>`;
+  }
+  
+  if (a.authorBio) {
+    bodyHTML += `<div style="font-size:13px;line-height:2;color:var(--ink-light);text-align:justify;margin-bottom:20px;font-family:'Noto Serif Bengali',serif">
+      ${parseRichTextInline(a.authorBio.replace(/\n/g, '<br>'))}
+    </div>`;
+  }
+  
+  // Books section removed as requested
+  
+  $('author-drawer-body').innerHTML = bodyHTML;
+  
+  // Wire up the edit button inside drawer
+  $('drawer-edit-btn').onclick = () => {
+    closeAuthorDrawer();
+    editAuthor(name);
+  };
+  
+  $('author-drawer-overlay').classList.add('show');
+  $('author-drawer').classList.add('show');
+}
+
+function closeAuthorDrawer() {
+  $('author-drawer-overlay').classList.remove('show');
+  $('author-drawer').classList.remove('show');
+}
+
+function exportAuthorsPDF(){
+  const authors = getUniqueAuthors();
+  if (authors.length === 0){ toast('কোনো লেখক নেই', 'error'); return; }
+  
+  function bn(n){const b=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];return String(n).replace(/[0-9]/g,d=>b[d])}
+  
+  let pages = '';
+  authors.forEach((a, i) => {
+    pages += `<div class="pdf-page">
+      <h2 style="text-align:center;border-bottom:2px solid #E8D5B0;padding-bottom:10px;margin-bottom:20px;color:#2C2420">${a.authorName}</h2>
+      ${a.authorNameEn ? `<p style="text-align:center;font-size:10pt;color:#8A7E75;font-family:Georgia,serif;margin-bottom:16px">${a.authorNameEn}${a.authorDates ? ' ('+a.authorDates+')' : ''}</p>` : ''}
+      <div style="background:rgba(139,94,60,.04);border:1px solid #E8D5B0;border-radius:8px;padding:14px 18px;margin-bottom:16px">
+        <dl style="display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:10pt">
+          ${a.authorDates ? `<dt style="font-weight:600;color:#8B5E3C">সময়কাল:</dt><dd style="color:#5A4E45">${a.authorDates}</dd>` : ''}
+          ${a.authorEdu ? `<dt style="font-weight:600;color:#8B5E3C">শিক্ষা:</dt><dd style="color:#5A4E45">${a.authorEdu}</dd>` : ''}
+          ${a.authorAwards ? `<dt style="font-weight:600;color:#8B5E3C">পুরস্কার:</dt><dd style="color:#5A4E45">${a.authorAwards}</dd>` : ''}
+        </dl>
+      </div>
+      ${a.authorBio ? `<div style="font-size:10.5pt;line-height:1.9;text-align:justify;color:#2C2420">${parseRichTextInline(a.authorBio.replace(/\n/g,'<br>'))}</div>` : ''}
+      <div style="margin-top:20px;border-top:1px solid #E8D5B0;padding-top:14px">
+        <div style="font-size:9pt;font-weight:700;color:#8B5E3C;margin-bottom:10px;letter-spacing:1px">রচনাবলি (${bn(a.books.length)}টি)</div>
+        ${a.books.map((b,bi) => `<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px;font-size:10pt">
+          <span style="color:#8B5E3C;font-weight:700">${bn(bi+1)}.</span>
+          <span style="color:#2C2420;font-weight:600">${b.bookName}</span>
+          ${b.pubYear ? `<span style="color:#8A7E75;font-size:9pt">(${b.pubYear})</span>` : ''}
+        </div>`).join('')}
+      </div>
+    </div>`;
+  });
+  
+  const dateStr = new Date().toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' });
+  
+  const html = `<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>লেখক পরিচিতি</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&family=Noto+Serif+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Noto Serif Bengali','Noto Sans Bengali',serif;background:#fff;color:#2C2420;line-height:1.85}
+  @page{size:A4;margin:20mm}
+  .pdf-page{width:100%;margin:0 auto;page-break-after:always;page-break-inside:avoid}
+  .pdf-page:last-child{page-break-after:auto}
+  h2{font-size:16pt;font-weight:700;color:#2C2420}
+  .cover{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100vh;background:linear-gradient(160deg,#2C2420 0%,#3D3229 30%,#4A3C30 60%,#5A4E40 100%);color:#F0E6D6;page-break-after:always}
+  .cover-title{font-size:28pt;font-weight:700;line-height:1.5}
+  .cover-sub{font-size:13pt;color:#E8D5B0;margin-top:8px}
+  .cover-orn{width:120px;height:2px;background:linear-gradient(90deg,transparent,#B8935A,transparent);margin:18px auto}
+  .cover-info{font-size:10pt;color:rgba(240,230,214,.5);margin-top:30px}
+</style></head><body>
+<div class="cover">
+  <div class="cover-title">লেখক পরিচিতি</div>
+  <div class="cover-sub">সংরক্ষিত লেখকদের বিস্তারিত তালিকা</div>
+  <div class="cover-orn"></div>
+  <div class="cover-info">মোট লেখক: ${bn(authors.length)}জন &nbsp;|&nbsp; রপ্তানিকৃত: ${dateStr}</div>
+</div>
+${pages}
+</body></html>`;
+  
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if (win) {
+    win.onload = () => { win.focus(); win.print(); };
+  } else {
+    const a = document.createElement('a');
+    a.href = url; a.download = 'lekhok-porichiti.html'; a.click();
+  }
+  URL.revokeObjectURL(url);
+  toast('লেখক পরিচিতি PDF রপ্তানি সম্পন্ন', 'success');
 }
 
 // ============== CHARACTERS VIEW ==============
@@ -2051,12 +2637,14 @@ function renderLibrary(){
     </div>`;
   }).join('');
 
-  // Add new card (mode-aware text)
-  const addText = currentMode === 'essay' ? 'নতুন প্রবন্ধ রচনা' : 'নতুন সমালোচনা';
-  html += `<div class="book-grid-add" onclick="navigate('editor');resetForm()">
-    <div class="book-grid-add-icon"><svg class="icon icon-lg"><use href="#i-plus"/></svg></div>
-    <div class="book-grid-add-text">${addText}</div>
-  </div>`;
+  // Add new card (mode-aware text) - only visible to Admins
+  if (isAdmin) {
+    const addText = currentMode === 'essay' ? 'নতুন প্রবন্ধ রচনা' : 'নতুন সমালোচনা';
+    html += `<div class="book-grid-add" onclick="navigate('editor');resetForm()">
+      <div class="book-grid-add-icon"><svg class="icon icon-lg"><use href="#i-plus"/></svg></div>
+      <div class="book-grid-add-text">${addText}</div>
+    </div>`;
+  }
 
   grid.innerHTML = html;
 }
@@ -2323,9 +2911,9 @@ function parseRichText(text, a = null){
 }
 
 function parseRichTextInline(text){
-  // Handle **text** (Larger inline text)
-  text = text.replace(/\*\*(.*?)\*\*/g, '<span style="font-size:1.1em;font-weight:600">$1</span>');
-  // Handle *text* (Bold text)
+  // Handle **text** (Bold + 1.1x font size)
+  text = text.replace(/\*\*(.*?)\*\*/g, '<span style="font-size:1.1em;font-weight:700">$1</span>');
+  // Handle *text* (Bold)
   text = text.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
   return text;
 }
@@ -3032,8 +3620,8 @@ function exportPDF(){
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Noto Serif Bengali','Noto Sans Bengali',serif;background:#E8E0D4;color:#2C2420;line-height:1.85;-webkit-font-smoothing:antialiased}
-  @page{size:A4;margin:0}
-  .pdf-page{width:210mm;min-height:297mm;padding:15mm 16mm 12mm 18mm;margin:8mm auto;background:#FDF8F0;box-shadow:0 4px 20px rgba(0,0,0,.14);position:relative;overflow:hidden;page-break-after:always}
+  @page{size:A4;margin:20mm}
+  .pdf-page{width:100%;min-height:100%;margin:0 auto;background:#FDF8F0;position:relative;overflow:hidden;page-break-after:always}
   .pdf-page::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='80' height='80' filter='url(%23n)' opacity='.018'/%3E%3C/svg%3E");pointer-events:none}
   .pdf-page>*{position:relative;z-index:1}
   .page-header{position:absolute;top:6mm;left:18mm;right:16mm;text-align:center;font-size:7pt;color:#8A7E75;font-style:italic;border-bottom:.5px solid #E8D5B0;padding-bottom:3px}
@@ -3294,6 +3882,15 @@ window.addEventListener('DOMContentLoaded', async () => {
     }, 50);
   }
 
+  // Check auth session
+  await checkSession();
+  
+  if (sb) {
+    sb.auth.onAuthStateChange((event, session) => {
+      checkSession();
+    });
+  }
+
   setMode(currentMode);
   // Load books from Supabase
   setSyncStatus('syncing', 'ডেটা লোড হচ্ছে...');
@@ -3306,6 +3903,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && currentView === 'reader') navigate('library');
     if (e.key === 'Escape') closeSidebar();
+    if (e.key === 'Escape') closeAuthorDrawer();
   });
 
   // Close sidebar when tapping outside (on the main content area)
@@ -3403,6 +4001,9 @@ window.addEventListener('DOMContentLoaded', async () => {
       });
     });
   })();
+  
+  // Initialize adjustable author drawer
+  initDrawerResize();
 });
 </script>
 </body>
