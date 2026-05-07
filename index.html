@@ -386,7 +386,7 @@
   .page > *{position:relative;z-index:1}
 
   .running-title{position:absolute;top:6mm;left:18mm;right:16mm;text-align:center;font-size:7pt;color:#8A7E75;font-style:italic;border-bottom:.5px solid #E8D5B0;padding-bottom:3px}
-  .section-header{text-align:center;margin-bottom:26px;padding-top:8px}
+  .section-header{text-align:center;margin-bottom:26px;padding-top:40px}
   .section-number{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font-size:11pt;font-weight:600;margin-bottom:8px}
   .section-title{font-size:17pt;font-weight:700;color:#2C2420;line-height:1.5}
   .section-title-light{font-size:11.5pt;font-weight:400;color:#8A7E75;margin-top:3px}
@@ -469,8 +469,9 @@
   .analysis-box p{font-size:10pt;color:#5A4E45;text-align:justify}
   .analysis-box.blue-box{background:rgba(74,109,124,.06);border-color:rgba(74,109,124,.2)}
   .analysis-box.blue-box .analysis-box-title{color:var(--blue)}
-  .analysis-box.red-box{background:rgba(158,74,74,.06);border-color:rgba(158,74,74,.2)}
-  .analysis-box.red-box .analysis-box-title{color:var(--red)}
+  .analysis-box.red-box{background:rgba(158,74,74,.04);border-color:rgba(158,74,74,.18);border-radius:10px;margin:6px 0!important;padding:10px 14px!important;text-align:left!important}
+  .analysis-box.red-box .analysis-box-title{color:var(--red);font-size:11pt;text-align:left!important;justify-content:flex-start!important}
+  .analysis-box.red-box div{text-align:left!important}
 
   /* IMAGE BLOCK */
   .analysis-img-block { margin: 24px 0; clear: both; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -1091,6 +1092,12 @@
           </button>
         </div>
         <div class="tag-dropdown" id="tag-dropdown"></div>
+        
+        <!-- Contextual PDF Export Button -->
+        <button class="btn btn-outline btn-sm icon-btn admin-only" onclick="exportCurrentModePDF()" id="lib-pdf-export-btn" style="margin-left:auto;padding:6px 14px;font-size:12px" title="PDF রপ্তানি">
+          <svg class="icon icon-sm"><use href="#i-printer"/></svg>
+          <span id="lbl-lib-pdf-text">সমালোচনা তালিকা PDF</span>
+        </button>
       </div>
 
       <div id="library-empty" class="empty" style="display:none">
@@ -1120,9 +1127,9 @@
           <svg class="icon icon-sm"><use href="#i-edit"/></svg>
           <span>সম্পাদনা</span>
         </button>
-        <button class="btn btn-outline btn-sm" onclick="window.print()">
+        <button class="btn btn-outline btn-sm" onclick="exportSingleBookPDF()">
           <svg class="icon icon-sm"><use href="#i-printer"/></svg>
-          <span>প্রিন্ট / PDF</span>
+          <span>PDF ডাউনলোড</span>
         </button>
         <button class="btn btn-outline btn-sm" onclick="deleteCurrentBook()" style="color:var(--red);border-color:var(--red-soft)">
           <svg class="icon icon-sm"><use href="#i-trash"/></svg>
@@ -1324,6 +1331,13 @@
                 <span>রিফ্রেশ</span>
               </button>
             </div>
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-title">সাধারণ ব্যবহারকারীদের জন্য PDF ডাউনলোড</div>
+                <div class="settings-row-desc">গ্রন্থাগার ট্যাব থেকে সাধারণ ব্যবহারকারীদের বাল্ক PDF রপ্তানি করার অনুমতি দিন</div>
+              </div>
+              <div id="toggle-user-pdf" class="switch" onclick="toggleUserPDFAccess()"></div>
+            </div>
           </div>
         </div>
 
@@ -1472,6 +1486,7 @@ let currentBookId = null;
 let editingBookId = null;
 let currentFilter = 'all';
 let currentTagFilter = '';
+let allowUserExportPDF = localStorage.getItem('allowUserExportPDF') === 'true';
 let editingAuthorName = null;
 let cloudSyncStatus = 'idle'; // idle, syncing, synced, error, offline
 
@@ -1693,6 +1708,14 @@ async function updateSettingsProfile() {
   }
 }
 
+function toggleUserPDFAccess() {
+  if (!isAdmin) return;
+  allowUserExportPDF = !allowUserExportPDF;
+  localStorage.setItem('allowUserExportPDF', allowUserExportPDF);
+  updateAccessControlUI();
+  toast(allowUserExportPDF ? 'সাধারণ ব্যবহারকারীরা এখন বাল্ক PDF ডাউনলোড করতে পারবেন।' : 'সাধারণ ব্যবহারকারীদের বাল্ক PDF ডাউনলোড বন্ধ করা হয়েছে।', 'success');
+}
+
 async function updateAccessControlUI() {
   const visibleStyle = isAdmin ? 'inline-flex' : 'none';
   const flexStyle = isAdmin ? 'flex' : 'none';
@@ -1701,12 +1724,22 @@ async function updateAccessControlUI() {
   // Update user profile in settings
   await updateSettingsProfile();
   
+  // Sync toggle switch visual state
+  const toggleBtn = $('toggle-user-pdf');
+  if (toggleBtn) {
+    toggleBtn.className = allowUserExportPDF ? 'switch on' : 'switch';
+  }
+  
   // Toggle Admin Settings section
   const adminSection = $('settings-admin-section');
   if (adminSection) adminSection.style.display = isAdmin ? 'block' : 'none';
   
   // Hide Quick Actions for non-admin
-  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'block' : 'none');
+  document.querySelectorAll('.admin-only').forEach(el => {
+    // Skip the library bulk PDF button since it has a separate override filter rule below
+    if (el.id === 'lib-pdf-export-btn') return;
+    el.style.display = isAdmin ? 'block' : 'none';
+  });
   
   // 1. Sidebar workspace restrictions
   const editorNavItem = document.querySelector('.nav-item[data-view="editor"]');
@@ -1750,6 +1783,12 @@ async function updateAccessControlUI() {
   document.querySelectorAll('.book-actions, .recent-edit').forEach(ctrl => {
     ctrl.style.display = isAdmin ? 'flex' : 'none';
   });
+
+  // 8. Bulk Library PDF Export toggle override rule
+  const libPdfBtn = $('lib-pdf-export-btn');
+  if (libPdfBtn) {
+    libPdfBtn.style.display = (isAdmin || allowUserExportPDF) ? 'inline-flex' : 'none';
+  }
   
   // Render dashboard / library to capture grid-add card etc.
   renderDashboard();
@@ -2192,14 +2231,7 @@ function exportAuthorsPDF(){
         </dl>
       </div>
       ${a.authorBio ? `<div style="font-size:10.5pt;line-height:1.9;text-align:justify;color:#2C2420">${parseRichTextInline(a.authorBio.replace(/\n/g,'<br>'))}</div>` : ''}
-      <div style="margin-top:20px;border-top:1px solid #E8D5B0;padding-top:14px">
-        <div style="font-size:9pt;font-weight:700;color:#8B5E3C;margin-bottom:10px;letter-spacing:1px">রচনাবলি (${bn(a.books.length)}টি)</div>
-        ${a.books.map((b,bi) => `<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px;font-size:10pt">
-          <span style="color:#8B5E3C;font-weight:700">${bn(bi+1)}.</span>
-          <span style="color:#2C2420;font-weight:600">${b.bookName}</span>
-          ${b.pubYear ? `<span style="color:#8A7E75;font-size:9pt">(${b.pubYear})</span>` : ''}
-        </div>`).join('')}
-      </div>
+
     </div>`;
   });
   
@@ -2211,10 +2243,10 @@ function exportAuthorsPDF(){
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Noto Serif Bengali','Noto Sans Bengali',serif;background:#fff;color:#2C2420;line-height:1.85}
   @page{size:A4;margin:20mm}
-  .pdf-page{width:100%;margin:0 auto;page-break-after:always;page-break-inside:avoid}
+  .pdf-page{width:100%;padding:10mm 12mm;margin:0 auto;page-break-after:always}
   .pdf-page:last-child{page-break-after:auto}
   h2{font-size:16pt;font-weight:700;color:#2C2420}
-  .cover{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100vh;background:linear-gradient(160deg,#2C2420 0%,#3D3229 30%,#4A3C30 60%,#5A4E40 100%);color:#F0E6D6;page-break-after:always}
+  .cover{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:calc(297mm - 40mm);padding:0 20px;background:linear-gradient(160deg,#2C2420 0%,#3D3229 30%,#4A3C30 60%,#5A4E40 100%);color:#F0E6D6;page-break-after:always}
   .cover-title{font-size:28pt;font-weight:700;line-height:1.5}
   .cover-sub{font-size:13pt;color:#E8D5B0;margin-top:8px}
   .cover-orn{width:120px;height:2px;background:linear-gradient(90deg,transparent,#B8935A,transparent);margin:18px auto}
@@ -2758,30 +2790,30 @@ function parseRichText(text, a = null){
     const placeholder = `__BLOCK_RED_${blockIndex}__`;
     blockPlaceholders.push({ 
       placeholder: placeholder, 
-      content: `<div class="analysis-box red-box" style="margin:16px 0"><div class="analysis-box-title"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg> গুরুত্বপূর্ণ তথ্য</div><div style="font-size:10.5pt;color:var(--ink-light);line-height:1.85">${parseRichTextInline(content.trim()).replace(/\n/g, '<br>')}</div></div>` 
+      content: `<div class="analysis-box red-box"><div class="analysis-box-title"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg> গুরুত্বপূর্ণ তথ্য</div><div style="font-size:10.5pt;color:var(--ink-light);line-height:1.85">${parseRichTextInline(content.trim()).replace(/\n/g, '<br>')}</div></div>` 
     });
     blockIndex++;
-    return '\n' + placeholder + '\n';
+    return placeholder;
   });
 
   processedText = processedText.replace(/#B([\s\S]*?)#B/g, (match, content) => {
     const placeholder = `__BLOCK_BLUE_${blockIndex}__`;
     blockPlaceholders.push({ 
       placeholder: placeholder, 
-      content: `<div class="analysis-box blue-box" style="margin:16px 0"><div class="analysis-box-title"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg> তথ্য / নোট</div><div style="font-size:10.5pt;color:var(--ink-light);line-height:1.85">${parseRichTextInline(content.trim()).replace(/\n/g, '<br>')}</div></div>` 
+      content: `<div class="analysis-box blue-box" style="margin:12px 0"><div class="analysis-box-title"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg> তথ্য / নোট</div><div style="font-size:10.5pt;color:var(--ink-light);line-height:1.85">${parseRichTextInline(content.trim()).replace(/\n/g, '<br>')}</div></div>` 
     });
     blockIndex++;
-    return '\n' + placeholder + '\n';
+    return placeholder;
   });
 
   processedText = processedText.replace(/#G([\s\S]*?)#G/g, (match, content) => {
     const placeholder = `__BLOCK_GREEN_${blockIndex}__`;
     blockPlaceholders.push({ 
       placeholder: placeholder, 
-      content: `<div class="analysis-box" style="margin:16px 0"><div class="analysis-box-title"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg> বিশ্লেষণ</div><div style="font-size:10.5pt;color:var(--ink-light);line-height:1.85">${parseRichTextInline(content.trim()).replace(/\n/g, '<br>')}</div></div>` 
+      content: `<div class="analysis-box" style="margin:12px 0"><div class="analysis-box-title"><svg class="icon icon-sm"><use href="#i-bookmark"/></svg> বিশ্লেষণ</div><div style="font-size:10.5pt;color:var(--ink-light);line-height:1.85">${parseRichTextInline(content.trim()).replace(/\n/g, '<br>')}</div></div>` 
     });
     blockIndex++;
-    return '\n' + placeholder + '\n';
+    return placeholder;
   });
 
   // 2. Split into lines to process lists, #T1, #T2, #P
@@ -2873,21 +2905,16 @@ function parseRichText(text, a = null){
     if (inUl) { html += '</ul>'; inUl = false; }
     if (inOl) { html += '</ol>'; inOl = false; }
     
-    // Check for inline #T1 or #T markers in line
+    // Check for inline #T1, #T2, #T3 markers in line
     let parsedLine = parseRichTextInline(line);
     Object.keys(tablesMap).forEach(k => {
       const kn = parseInt(k);
-      const marker = kn === 1 ? '#T1' : `#T${kn}`;
+      const marker = `#T${kn}`;
       if (parsedLine.includes(marker)) {
         parsedLine = parsedLine.replace(marker, tablesMap[k]);
         renderedTables[kn] = true;
       }
     });
-    // Support generic #T as table 1
-    if (parsedLine.includes('#T') && tablesMap[1] && !renderedTables[1]) {
-      parsedLine = parsedLine.replace('#T', tablesMap[1]);
-      renderedTables[1] = true;
-    }
     if (parsedLine.includes('#P') && imageHTML && !renderedImage) {
       parsedLine = parsedLine.replace('#P', imageHTML);
       renderedImage = true;
@@ -2899,12 +2926,7 @@ function parseRichText(text, a = null){
   if (inUl) html += '</ul>';
   if (inOl) html += '</ol>';
   
-  // Append any unused tables (fallback if no #T markers in body)
-  Object.keys(tablesMap).forEach(k => {
-    const kn = parseInt(k);
-    if (renderedTables[kn]) return;
-    html += tablesMap[k];
-  });
+  // No automatic fallback appending of tables - only show if called explicitly via #T1, #T2, #T3
   if (imageHTML && !renderedImage) html = imageHTML + html;
   
   return html;
@@ -2999,21 +3021,20 @@ function updateTableNumbers(n) {
   });
 }
 
-function rebuildDynTable(blockId, rows, cols, existing) {
-  const container = document.getElementById(blockId);
-  if (!container) return;
-  const block = container.closest('.analysis-table-block');
-  if (!block) return;
-  rows = rows || parseInt(block.querySelector('.tbl-rows')?.value) || 3;
-  cols = cols || parseInt(block.querySelector('.tbl-cols')?.value) || 3;
-  const hidden = block.querySelector('.tbl-data');
-  let existingData = [];
-  const existingVal = existing !== undefined ? existing : (hidden?.value || '');
-  if (existingVal.trim()) existingData = existingVal.split('\n').map(r => r.split(/[,\t|]/));
+function rebuildETable(n, tn) {
+  const container = $(`etbl-${n}-${tn}`);
+  const wrap = document.getElementById('analysis-' + n);
+  if (!container || !wrap) return;
 
-  let html = '<table style="width:100%;border-collapse:collapse;font-family:\'Noto Sans Bengali\',sans-serif;font-size:11pt;table-layout:auto"><thead><tr style="background:var(--bg-soft);border-bottom:2px solid var(--border)">';
+  const rows = parseInt(wrap.querySelector(`.tbl-rows-${tn}`)?.value) || 3;
+  const cols = parseInt(wrap.querySelector(`.tbl-cols-${tn}`)?.value) || 3;
+  const hidden = wrap.querySelector(`.tbl-data-${tn}`);
+  let existingData = [];
+  if (hidden && hidden.value.trim()) existingData = hidden.value.split('\n').map(r => r.split(/[,\t|]/));
+
+  let html = '<table class="editable-table" style="width:100%;border-collapse:collapse;font-family:\'Noto Sans Bengali\',sans-serif;font-size:11pt;table-layout:auto"><thead><tr style="background:var(--bg-soft);border-bottom:2px solid var(--border)">';
   for (let c = 0; c < cols; c++) {
-    const val = (existingData[0] && existingData[0][c]) ? existingData[0][c].trim() : 'শিরোনাম'+(c+1);
+    const val = (existingData[0] && existingData[0][c]) ? existingData[0][c].trim() : 'শিরোনাম' + (c+1);
     html += `<th style="padding:10px 12px;border-right:1px solid var(--border-soft);text-align:left;font-weight:700;color:var(--ink);min-width:80px" contenteditable="true">${val}</th>`;
   }
   html += '</tr></thead><tbody>';
@@ -3033,74 +3054,18 @@ function rebuildDynTable(blockId, rows, cols, existing) {
     const rows2 = [];
     let row = [];
     tds.forEach(cell => {
-      row.push(cell.innerText.trim().replace(/\n/g,' '));
+      row.push(cell.textContent.trim().replace(/\n/g,' '));
       if (row.length === cols) { rows2.push(row.join(',')); row = []; }
     });
     if (hidden) hidden.value = rows2.join('\n');
   };
+  
   container.querySelectorAll('[contenteditable]').forEach(cell => {
     cell.addEventListener('input', save);
     cell.addEventListener('blur', save);
   });
   save();
 }
-
-function rebuildEditableTable(n, tableNum = 1) {
-  const containerId = tableNum === 1 ? `editable-table-${n}` : `editable-table-${n}-${tableNum}`;
-  const container = $(containerId);
-  const wrap = document.getElementById('analysis-' + n);
-  if (!container || !wrap) return;
-
-  const rowsClass = '.tbl-rows';
-  const colsClass = '.tbl-cols';
-  const dataClass = '.tbl-data';
-
-  const rows = parseInt(wrap.querySelector(rowsClass)?.value) || 3;
-  const cols = parseInt(wrap.querySelector(colsClass)?.value) || 3;
-  const hidden = wrap.querySelector(dataClass);
-  let existing = [];
-  if (hidden && hidden.value.trim()) existing = hidden.value.split('\n').map(r => r.split(/[,\t|]/));
-
-  let html = '<table class="editable-table" style="width:100%;border-collapse:collapse;font-family:\'Noto Sans Bengali\',sans-serif;font-size:11.5pt;table-layout:auto">';
-  // Build header row
-  html += '<thead><tr style="background:var(--bg-soft);border-bottom:2px solid var(--border)">';
-  for (let c = 0; c < cols; c++) {
-    const val = (existing[0] && existing[0][c]) ? existing[0][c].trim() : 'শিরোনাম' + (c+1);
-    html += `<th style="padding:10px 12px;border-right:1px solid var(--border-soft);text-align:left;font-weight:700;color:var(--ink);min-width:80px" contenteditable="true">${val}</th>`;
-  }
-  html += '</tr></thead><tbody>';
-  // Build data rows
-  for (let r = 1; r < rows; r++) {
-    html += '<tr style="border-bottom:1px solid var(--border-soft)">';
-    for (let c = 0; c < cols; c++) {
-      const val = (existing[r] && existing[r][c]) ? existing[r][c].trim() : '';
-      html += `<td style="padding:10px 12px;border-right:1px solid var(--border-soft);color:var(--ink-light);min-width:80px" contenteditable="true">${val}</td>`;
-    }
-    html += '</tr>';
-  }
-  html += '</tbody></table>';
-  container.innerHTML = html;
-
-  // Auto-save to hidden input when cells change
-  const saveTableData = () => {
-    const tds = container.querySelectorAll('th, td');
-    const rowData = [];
-    let currentRow = [];
-    tds.forEach(cell => {
-      currentRow.push(cell.innerText.trim().replace(/\n/g, ' '));
-      if (currentRow.length === cols) { rowData.push(currentRow.join(',')); currentRow = []; }
-    });
-    if (hidden) hidden.value = rowData.join('\n');
-  };
-
-  container.querySelectorAll('[contenteditable]').forEach(cell => {
-    cell.addEventListener('input', saveTableData);
-    cell.addEventListener('blur', saveTableData);
-  });
-  saveTableData();
-}
-
-function generateTableTemplate(n) { rebuildEditableTable(n); }
 function addCharField(data={}){
   charCount++;
   const c = document.createElement('div');
@@ -3147,24 +3112,43 @@ function addAnalysisField(data={}){
       </div></div>
     </div>
     <div id="analysis-table-wrap-${n}" style="display:${hasTable?'block':'none'}">
-      <div id="analysis-tables-container-${n}"></div>
-      <button type="button" class="add-repeat" style="margin-top:12px;width:100%;justify-content:center" onclick="addTableToAnalysis(${n})">
-        <svg class="icon"><use href="#i-plus"/></svg> আরও একটি ছক যোগ করুন
-      </button>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg-soft);border-radius:8px;border:1px solid var(--border-soft);margin-bottom:14px">
+        <svg class="icon icon-sm" style="color:var(--accent)"><use href="#i-bookmark"/></svg>
+        <span style="font-size:11px;font-weight:600;color:var(--ink-light);font-family:'Noto Sans Bengali',sans-serif">বিস্তারিতে <code style="background:var(--bg-elev);padding:1px 6px;border-radius:4px;font-size:10px">#T1</code> <code style="background:var(--bg-elev);padding:1px 6px;border-radius:4px;font-size:10px">#T2</code> <code style="background:var(--bg-elev);padding:1px 6px;border-radius:4px;font-size:10px">#T3</code> লিখে যেকোনো জায়গায় ছক বসান</span>
+      </div>
+      ${[1,2,3].map(tn => {
+        const savedT = data.tables ? data.tables.find(t => t.tableNum === tn) : null;
+        const tData = savedT ? savedT.tableData : (tn===1 ? data.tableData||'' : '');
+        const tRows = savedT ? savedT.rows : (tn===1 ? data.tableRows||3 : 3);
+        const tCols = savedT ? savedT.cols : (tn===1 ? data.tableCols||3 : 3);
+        const tCap = savedT ? savedT.caption : (tn===1 ? data.tableCaption||'' : '');
+        const label = tn === 1 ? 'ছক ১' : tn === 2 ? 'ছক ২' : 'ছক ৩';
+        return `
+        <div class="repeat-group" style="background:var(--bg-elev);margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;padding:0 4px">
+            <svg class="icon icon-sm" style="color:var(--accent)"><use href="#i-bookmark"/></svg>
+            <span style="font-size:12px;font-weight:700;color:var(--accent);font-family:'Noto Sans Bengali',sans-serif">${label}</span>
+            <code style="font-size:10px;background:var(--bg-soft);padding:2px 6px;border-radius:4px;color:var(--ink-lighter)">T${tn}</code>
+          </div>
+          <div class="form-row">
+            <div><label class="form-label">সারি</label><input type="number" class="form-input tbl-rows-${tn}" value="${tRows}" min="2" max="15" onchange="rebuildETable(${n},${tn})"></div>
+            <div><label class="form-label">কলাম</label><input type="number" class="form-input tbl-cols-${tn}" value="${tCols}" min="2" max="8" onchange="rebuildETable(${n},${tn})"></div>
+          </div>
+          <div class="form-row full"><div><label class="form-label">ক্যাপশন</label><input class="form-input tbl-caption-${tn}" value="${tCap}"></div></div>
+          <div class="form-row full">
+            <div><label class="form-label">ছকের তথ্য (সরাসরি টেবিলে লিখুন)</label>
+            <input type="hidden" class="tbl-data-${tn}" value="${(tData).replace(/"/g,'&quot;')}">
+            <div class="editable-table-wrap" id="etbl-${n}-${tn}" style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;background:#fff;min-height:60px"></div></div>
+          </div>
+        </div>`;
+      }).join('')}
     </div>`;
   $('analysis-container').appendChild(a);
   if (data.type) a.querySelector('.analysis-type-input').value = data.type;
-  // Build tables after DOM insertion
   if (hasTable) {
     setTimeout(() => {
-      const existingTables = data.tables || [];
-      if (existingTables.length === 0) {
-        // First time: add a default table 1
-        addTableToAnalysis(n, {tableNum: 1, rows: data.tableRows||3, cols: data.tableCols||3, caption: data.tableCaption||'', tableData: data.tableData||''});
-      } else {
-        existingTables.forEach((t, ti) => addTableToAnalysis(n, t));
-      }
-    }, 50);
+      [1,2,3].forEach(tn => rebuildETable(n, tn));
+    }, 100);
   }
 }
 
@@ -3443,19 +3427,25 @@ async function saveBook(){
       if (!item.imgData && !item.imgUrl && !item.body) return;
     }
     if (type === 'table'){
-      // Collect all dynamic tables
-      const tableBlocks = g.querySelectorAll('.analysis-table-block');
       const tables = [];
-      tableBlocks.forEach((block, i) => {
-        const tableNum = i + 1;
-        const tableData = (block.querySelector('.tbl-data')?.value || '').trim();
-        const rows = block.querySelector('.tbl-rows')?.value || '3';
-        const cols = block.querySelector('.tbl-cols')?.value || '3';
-        const caption = (block.querySelector('.tbl-caption')?.value || '').trim();
-        if (tableData) tables.push({ tableNum, rows, cols, caption, tableData });
+      [1, 2, 3].forEach(tn => {
+        const tableData = (g.querySelector(`.tbl-data-${tn}`)?.value || '').trim();
+        const rows = g.querySelector(`.tbl-rows-${tn}`)?.value || '3';
+        const cols = g.querySelector(`.tbl-cols-${tn}`)?.value || '3';
+        const caption = (g.querySelector(`.tbl-caption-${tn}`)?.value || '').trim();
+        
+        // Always store table configuration metadata so fields are saved
+        tables.push({
+          tableNum: tn,
+          rows: parseInt(rows) || 3,
+          cols: parseInt(cols) || 3,
+          caption: caption,
+          tableData: tableData
+        });
       });
       item.tables = tables;
-      // Backward compatibility: first table also stored at root
+      
+      // Keep root references for fallback compatibility
       if (tables.length > 0) {
         item.tableData = tables[0].tableData;
         item.tableCaption = tables[0].caption;
@@ -3619,15 +3609,17 @@ function exportPDF(){
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&family=Noto+Serif+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Noto Serif Bengali','Noto Sans Bengali',serif;background:#E8E0D4;color:#2C2420;line-height:1.85;-webkit-font-smoothing:antialiased}
+  body{font-family:'Noto Serif Bengali','Noto Sans Bengali',serif;background:#fff;color:#2C2420;line-height:1.85;-webkit-font-smoothing:antialiased;margin:0;padding:0}
   @page{size:A4;margin:20mm}
-  .pdf-page{width:100%;min-height:100%;margin:0 auto;background:#FDF8F0;position:relative;overflow:hidden;page-break-after:always}
-  .pdf-page::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='80' height='80' filter='url(%23n)' opacity='.018'/%3E%3C/svg%3E");pointer-events:none}
-  .pdf-page>*{position:relative;z-index:1}
-  .page-header{position:absolute;top:6mm;left:18mm;right:16mm;text-align:center;font-size:7pt;color:#8A7E75;font-style:italic;border-bottom:.5px solid #E8D5B0;padding-bottom:3px}
-
+  .pdf-page{width:100%;margin:0 auto;background:#fff;position:relative;page-break-after:always;padding-top:6mm}
+  /* To ensure section blocks don't split over pages awkwardly */
+  .pdf-page > h2, .analysis-box, .rich-quote, .analysis-img-block, .analysis-table-wrap, .author-profile { page-break-inside: avoid; }
+  .pdf-page > h2 { page-break-after: avoid; }
+  .page-header{position:absolute;top:0;left:0;right:0;text-align:center;font-size:7pt;color:#8A7E75;font-style:italic;border-bottom:.5px solid #E8D5B0;padding-bottom:2px}
+  .running-title{position:absolute;top:0;left:0;right:0;text-align:center;font-size:7pt;color:#8A7E75;font-style:italic;border-bottom:.5px solid #E8D5B0;padding-bottom:2px}
+  
   /* COVER */
-  .cover-page{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(160deg,#2C2420 0%,#3D3229 30%,#4A3C30 60%,#5A4E40 100%);color:#F0E6D6;padding:0!important}
+  .cover-page{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(160deg,#2C2420 0%,#3D3229 30%,#4A3C30 60%,#5A4E40 100%);color:#F0E6D6;padding:0!important;height:100vh}
   .cover-page>*{position:relative;z-index:1}
   .cover-orn{width:120px;height:2px;background:linear-gradient(90deg,transparent,#B8935A,transparent);margin:18px auto}
   .cover-title{font-size:28pt;font-weight:700;line-height:1.5;text-shadow:0 2px 10px rgba(0,0,0,.3)}
@@ -3636,7 +3628,7 @@ function exportPDF(){
   .cover-tagline{font-size:9pt;color:rgba(240,230,214,.4);font-style:italic;margin-top:10px}
   .cover-count{font-size:12pt;color:#B8935A;margin-top:40px;letter-spacing:2px}
 
-  .section-header{text-align:center;margin-bottom:26px;padding-top:8px}
+  .section-header{text-align:center;margin-bottom:26px;padding-top:40px}
   .section-number{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#8B5E3C;color:#fff;font-size:11pt;font-weight:600;margin-bottom:8px}
   .section-title{font-size:17pt;font-weight:700;color:#2C2420;line-height:1.5}
   .section-title-light{font-size:11.5pt;font-weight:400;color:#8A7E75;margin-top:3px}
@@ -3669,8 +3661,9 @@ function exportPDF(){
   .analysis-box p{font-size:10pt;color:#5A4E45;text-indent:0;text-align:justify}
   .analysis-box.blue-box{background:rgba(74,109,124,.06);border-color:rgba(74,109,124,.2)}
   .analysis-box.blue-box .analysis-box-title{color:#4A6D7C}
-  .analysis-box.red-box{background:rgba(158,74,74,.06);border-color:rgba(158,74,74,.2)}
-  .analysis-box.red-box .analysis-box-title{color:#9E4A4A}
+  .analysis-box.red-box{background:rgba(158,74,74,.04);border-color:rgba(158,74,74,.18);border-radius:10px;margin:6px 0!important;padding:10px 14px!important;text-align:left!important}
+  .analysis-box.red-box .analysis-box-title{color:#9E4A4A;font-size:11pt;text-align:left!important;justify-content:flex-start!important}
+  .analysis-box.red-box div{text-align:left!important}
   .epigraph{text-align:center;margin:24px 0;padding:16px 28px;font-style:italic;color:#5A4E45}
   .epigraph::before,.epigraph::after{content:'';display:block;width:24px;height:6px;margin:8px auto;background:linear-gradient(90deg,transparent,#B8935A,transparent);border-radius:50%;opacity:.7}
   .epigraph-text{font-size:11pt;line-height:1.9}
@@ -3826,6 +3819,390 @@ ${renderEssayPages(essays, critiques.length + 1)}
   }
   URL.revokeObjectURL(url);
   toast('PDF-ready HTML ফাইল রপ্তানি সম্পন্ন।', 'success');
+}
+
+function exportCurrentModePDF(){
+  const filtered = books.filter(b => (b.mode||'critique') === currentMode);
+  if (filtered.length === 0){ toast('রপ্তানি করার মতো কোনো ডেটা নেই', 'error'); return; }
+
+  const isEssay = currentMode === 'essay';
+  const dateStr = new Date().toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' });
+
+  function bn(n){const b=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];return String(n).replace(/[0-9]/g,d=>b[d])}
+
+  let pages = '';
+  filtered.forEach((b, i) => {
+    const sn = bn(i + 1);
+    pages += `<div class="pdf-page">
+      <div class="page-header"><span>${b.bookName} ${isEssay ? '' : ' — ' + b.authorName}</span></div>
+      <div class="section-header"><div class="section-number">${sn}</div><div class="section-title">${b.bookName}</div>${isEssay ? '' : `<div class="section-title-light">${b.authorName}</div>`}<div class="section-divider"></div></div>
+      <div class="novel-header"><div class="novel-title-bn">${b.bookName}</div>${b.bookNameEn?`<div class="novel-title-en">${b.bookNameEn}</div>`:''}${isEssay ? '' : `<div class="novel-meta">লেখক: ${b.authorName}${b.pubYear?' | প্রকাশকাল: '+b.pubYear:''}</div>`}</div>`;
+    if (b.epigraph) pages += `<div class="epigraph"><div class="epigraph-text">"${b.epigraph}"</div></div>`;
+    
+    if (!isEssay) {
+      pages += `<h2>${sn}.১ লেখকের পরিচিতি: ${b.authorName}</h2><div class="author-profile"><div class="author-name">${b.authorName}</div>`;
+      if (b.authorNameEn) pages += `<div class="author-name-en">${b.authorNameEn}${b.authorDates?' ('+b.authorDates+')':''}</div>`;
+      pages += `<dl class="author-detail">`;
+      if (b.authorDates) pages += `<dt>সময়কাল:</dt><dd>${b.authorDates}</dd>`;
+      if (b.authorEdu) pages += `<dt>শিক্ষা:</dt><dd>${b.authorEdu}</dd>`;
+      if (b.authorAwards) pages += `<dt>পুরস্কার:</dt><dd>${b.authorAwards}</dd>`;
+      pages += `</dl></div>`;
+      pages += parseRichText(b.authorBio);
+      
+      if (b.chars && b.chars.length > 0){
+        pages += `<h2>${sn}.২ চরিত্র পরিচিতি</h2>`;
+        b.chars.forEach(c => { pages += `<div class="char-card"><div class="char-name">${c.name}</div><p class="char-desc">${c.desc||''}</p></div>`; });
+      }
+    } else {
+      if (b.authorBio) {
+        pages += `<h2>${sn}.১ পরিচিতি</h2>`;
+        pages += parseRichText(b.authorBio);
+      }
+    }
+    
+    let si = isEssay ? (b.authorBio ? 2 : 1) : ((b.chars?.length||0) > 0 ? 3 : 2);
+    (b.analyses||[]).forEach(a => {
+      const num = bn(si);
+      pages += `<h2>${sn}.${num} ${a.title}</h2>`;
+      let contentHTML = textToParas(a.body, a);
+      if (a.type === 'blockquote'){
+        pages += `<blockquote>${contentHTML}</blockquote>`;
+      } else if (a.type && a.type.startsWith('analysis-')){
+        const cls = a.type === 'analysis-blue' ? ' blue-box' : a.type === 'analysis-red' ? ' red-box' : '';
+        pages += `<div class="analysis-box${cls}"><div class="analysis-box-title"><svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> ${a.title}</div>${contentHTML}</div>`;
+      } else {
+        pages += contentHTML;
+      }
+      si++;
+    });
+    
+    pages += `<h2>${sn}.${bn(si)} ${isEssay ? 'উপসংহার' : 'সারসংক্ষেপ ও মূল্যায়ন'}</h2>`;
+    pages += parseRichText(b.summary);
+    pages += `</div>`;
+  });
+
+  let tocItems = `<div class="toc-section-title">${isEssay ? 'প্রবন্ধ তালিকা' : 'গ্রন্থ সমালোচনা তালিকা'}</div>`;
+  filtered.forEach((b, i) => {
+    tocItems += `<div class="toc-item"><span class="toc-num">${bn(i+1)}</span><span class="toc-dots"></span><span class="toc-text">${b.bookName}${isEssay ? '' : ' — ' + b.authorName}</span></div>`;
+  });
+
+  const html = `<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>${isEssay ? 'প্রবন্ধ সংকলন' : 'গ্রন্থ সমালোচনা সংকলন'}</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&family=Noto+Serif+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Noto Serif Bengali','Noto Sans Bengali',serif;background:#fff;color:#2C2420;line-height:1.85;-webkit-font-smoothing:antialiased;margin:0;padding:0}
+  @page{size:A4;margin:20mm}
+  .pdf-page{width:100%;margin:0 auto;background:#fff;position:relative;page-break-after:always;padding-top:6mm}
+  .pdf-page > h2, .analysis-box, .rich-quote, .analysis-img-block, .analysis-table-wrap, .author-profile, .char-card { page-break-inside: avoid; }
+  .pdf-page > h2 { page-break-after: avoid; }
+  .page-header{position:absolute;top:0;left:0;right:0;text-align:center;font-size:7pt;color:#8A7E75;font-style:italic;border-bottom:.5px solid #E8D5B0;padding-bottom:2px}
+  .running-title{position:absolute;top:0;left:0;right:0;text-align:center;font-size:7pt;color:#8A7E75;font-style:italic;border-bottom:.5px solid #E8D5B0;padding-bottom:2px}
+  .cover-page{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(160deg,#2C2420 0%,#3D3229 30%,#4A3C30 60%,#5A4E40 100%);color:#F0E6D6;padding:0!important;height:100vh}
+  .cover-page>*{position:relative;z-index:1}
+  .cover-orn{width:120px;height:2px;background:linear-gradient(90deg,transparent,#B8935A,transparent);margin:18px auto}
+  .cover-title{font-size:28pt;font-weight:700;line-height:1.5;text-shadow:0 2px 10px rgba(0,0,0,.3)}
+  .cover-sub{font-size:14pt;font-weight:400;color:#E8D5B0;margin-top:8px}
+  .cover-num{font-size:10pt;color:rgba(240,230,214,.5);margin-top:30px;letter-spacing:3px}
+  .cover-tagline{font-size:9pt;color:rgba(240,230,214,.4);font-style:italic;margin-top:10px}
+  .cover-count{font-size:12pt;color:#B8935A;margin-top:40px;letter-spacing:2px}
+  .section-header{text-align:center;margin-bottom:26px;padding-top:40px}
+  .section-number{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#8B5E3C;color:#fff;font-size:11pt;font-weight:600;margin-bottom:8px}
+  .section-title{font-size:17pt;font-weight:700;color:#2C2420;line-height:1.5}
+  .section-title-light{font-size:11.5pt;font-weight:400;color:#8A7E75;margin-top:3px}
+  .section-divider{width:70px;height:2px;background:linear-gradient(90deg,transparent,#8B5E3C,transparent);margin:10px auto 0}
+  h2{font-size:14.5pt;font-weight:700;color:#2C2420;margin-top:24px;margin-bottom:12px;padding-bottom:5px;border-bottom:1px solid #E8D5B0;line-height:1.5;padding-top:6mm}
+  p{font-size:10.5pt;text-align:justify;margin-bottom:10px;line-height:1.9;text-indent:0}
+  .drop-cap::first-letter{font-size:3em;float:left;line-height:.78;margin:3px 7px 0 0;color:#8B5E3C;font-weight:700}
+  blockquote{margin:14px 0;padding:12px 18px;border-left:3px solid #8B5E3C;background:rgba(139,94,60,.04);border-radius:0 6px 6px 0;font-style:italic}
+  blockquote p{text-indent:0;font-size:10pt;color:#5A4E45}
+  .rich-list{margin:12px 0 12px 28px;padding:0}
+  .rich-list li{font-size:10.5pt;line-height:1.9;color:#2C2420;margin-bottom:6px;padding-left:6px}
+  .rich-list ul, .rich-list ol{margin-top:6px;margin-bottom:6px}
+  .rich-list[data-type="bn"]{list-style-type:bengali}
+  .rich-list[data-type="1"]{list-style-type:decimal}
+  .char-card{background:rgba(255,255,255,.6);border:1px solid #E8D5B0;border-radius:7px;padding:14px 18px;margin:12px 0;position:relative}
+  .char-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:#8B5E3C;border-radius:7px 0 0 7px}
+  .char-name{font-size:11.5pt;font-weight:700;color:#8B5E3C;margin-bottom:4px}
+  .char-desc{font-size:9.5pt;color:#5A4E45;line-height:1.75;text-indent:0}
+  .author-profile{background:linear-gradient(135deg,rgba(139,94,60,.06),rgba(184,147,90,.04));border:1px solid #E8D5B0;border-radius:8px;padding:16px 18px;margin:16px 0}
+  .author-name{font-size:14pt;font-weight:700;color:#2C2420;margin-bottom:3px}
+  .author-name-en{font-size:9.5pt;color:#8A7E75;font-family:Georgia,serif;margin-bottom:10px}
+  .author-detail{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:9.5pt;margin:10px 0}
+  .author-detail dt{font-weight:600;color:#8B5E3C}
+  .author-detail dd{color:#5A4E45}
+  .analysis-box{background:rgba(92,122,94,.04);border:1px solid rgba(92,122,94,.18);border-radius:10px;padding:14px 18px;margin:6px 0!important;text-align:left!important}
+  .analysis-box-title{font-size:11pt;font-weight:700;color:#5C7A5E;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-align:left!important;justify-content:flex-start!important}
+  .analysis-box p{font-size:10pt;color:#5A4E45;text-indent:0;text-align:justify}
+  .analysis-box.blue-box{background:rgba(74,109,124,.06);border-color:rgba(74,109,124,.2)}
+  .analysis-box.blue-box .analysis-box-title{color:#4A6D7C}
+  .analysis-box.red-box{background:rgba(158,74,74,.04);border-color:rgba(158,74,74,.18)}
+  .analysis-box.red-box .analysis-box-title{color:#9E4A4A}
+  .analysis-box.red-box div{text-align:left!important}
+  .epigraph{text-align:center;margin:24px 0;padding:16px 28px;font-style:italic;color:#5A4E45}
+  .epigraph::before,.epigraph::after{content:'';display:block;width:24px;height:6px;margin:8px auto;background:linear-gradient(90deg,transparent,#B8935A,transparent);border-radius:50%;opacity:.7}
+  .epigraph-text{font-size:11pt;line-height:1.9}
+  .novel-header{text-align:center;margin:16px 0 22px;padding:20px;background:linear-gradient(135deg,rgba(139,94,60,.08),rgba(184,147,90,.04));border-radius:8px;border:1px solid #E8D5B0}
+  .novel-title-bn{font-size:16pt;font-weight:800;color:#2C2420;line-height:1.5}
+  .novel-title-en{font-size:9.5pt;color:#8A7E75;font-family:Georgia,serif;margin-top:2px}
+  .page-footer-marker{text-align:center;font-size:9pt;color:#8A7E75;font-style:italic;margin-top:36px}
+  .ico{display:inline-block;vertical-align:middle}
+  .rich-quote {
+    position: relative; margin: 28px 0; padding: 24px 30px;
+    background: linear-gradient(135deg, rgba(184,147,90,0.06), rgba(139,94,60,0.02));
+    border-radius: 12px;
+    font-family: 'Noto Serif Bengali', serif; font-style: italic;
+    font-size: 11.5pt; line-height: 1.9; color: #2C2420;
+    width: 100%;
+  }
+  .rich-quote::before {
+    content: '"'; position: absolute; left: 10px; top: -10px;
+    font-family: Georgia, serif; font-size: 50pt; color: #8B5E3C;
+    line-height: 1; opacity: 0.25; font-style: normal;
+  }
+  .rich-quote::after {
+    content: '"'; position: absolute; right: 14px; bottom: -30px;
+    font-family: Georgia, serif; font-size: 50pt; color: #8B5E3C;
+    line-height: 1; opacity: 0.25; font-style: normal;
+  }
+  .quote-text-left { text-align: left; border-left: 4px solid #8B5E3C; border-radius: 0 12px 12px 0; padding-left: 40px; margin-left: 0; max-width: 100%; }
+  .quote-text-center { text-align: center; border-top: 2px solid rgba(139,94,60,.3); border-bottom: 2px solid rgba(139,94,60,.3); border-radius: 16px; }
+  .rich-quote p { margin: 0 0 8px 0 !important; padding: 0 !important; text-indent: 0 !important; text-align: inherit !important; }
+  .rich-quote p:last-child { margin-bottom: 0 !important; }
+  .analysis-table-wrap{margin:20px 0;width:100%}
+  .analysis-table-caption{font-size:10.5pt;font-weight:600;color:#8B5E3C;text-align:left;padding:0 4px 10px;font-family:'Noto Sans Bengali',sans-serif;line-height:1.5}
+  .analysis-table-box{width:100%;overflow:hidden;border-radius:10px;border:1.5px solid #ddd;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+  .analysis-table{width:100%;border-collapse:collapse;font-family:'Noto Sans Bengali',sans-serif;font-size:10pt;text-align:left}
+  .analysis-table thead tr{background:linear-gradient(135deg,#4A6D7C,#3B5A69)}
+  .analysis-table thead th{padding:12px 18px;text-align:left;font-weight:700;font-size:10pt;color:#fff;border-bottom:2.5px solid rgba(0,0,0,.1);border-right:1px solid rgba(255,255,255,.15)}
+  .analysis-table thead th:last-child{border-right:none}
+  .analysis-table tbody tr:nth-child(odd){background:#F8FAFB}
+  .analysis-table tbody tr:nth-child(even){background:#EBF3F7}
+  .analysis-table tbody td{padding:11px 18px;border-bottom:1px solid #E0EBF0;border-right:1px solid #E0EBF0;color:#334155}
+  .analysis-table tbody tr:last-child td{border-bottom:none}
+  .analysis-table tbody td:last-child{border-right:none}
+  .analysis-img-block{margin:24px auto;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .analysis-img-wrap{margin:0 auto;max-width:80%;border-radius:12px;border:1px solid #E8E0D4;overflow:hidden;background:#fff;line-height:0;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+  .analysis-img-wrap img{width:100%;height:auto;object-fit:contain;max-height:400px}
+  .analysis-img-caption{font-size:9.5pt;color:#8A7E75;font-style:italic;text-align:center;margin-top:10px;padding:0 12px;line-height:1.5;font-family:'Noto Sans Bengali',sans-serif}
+  .toc-section-title{font-size:11.5pt;font-weight:700;color:#8B5E3C;margin:28px 0 14px;padding-bottom:5px;border-bottom:1px solid #E8D5B0}
+  .toc-item{display:flex;align-items:baseline;margin:6px 0;font-size:10.5pt}
+  .toc-num{width:32px;font-weight:700;color:#8B5E3C;flex-shrink:0}
+  .toc-dots{flex:1;border-bottom:1px dotted #E8D5B0;margin:0 6px;height:1em}
+  .toc-text{flex:1;color:#2C2420;padding-left:6px}
+  .toc-section{max-width:450px;margin:0 auto;padding:28px}
+  .toc-title{font-size:18pt;font-weight:700;color:#2C2420;text-align:center;margin-bottom:30px}
+  .toc-title-divider{width:70px;height:2px;background:linear-gradient(90deg,transparent,#8B5E3C,transparent);margin:12px auto 30px}
+  .footer-note{text-align:center;font-size:8pt;color:#8A7E75;margin-top:20px;font-style:italic}
+</style></head><body>
+<div class="cover-page">
+  <div style="margin-bottom:24px"><svg width="50" height="50" viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="28" stroke="#B8935A" stroke-width=".5" fill="none"/><circle cx="30" cy="30" r="24" stroke="#B8935A" stroke-width=".3" fill="none"/><text x="30" y="35" text-anchor="middle" fill="#B8935A" font-size="18" font-family="serif">পু</text></svg></div>
+  <div class="cover-orn"></div>
+  <div class="cover-title">${isEssay ? 'প্রবন্ধ সংকলন' : 'গ্রন্থ সমালোচনা সংকলন'}</div>
+  <div class="cover-sub">বিশ্লেষণ, সমালোচনা ও পাঠচিন্তা</div>
+  <div class="cover-orn"></div>
+  <div class="cover-count">রচনাসংখ্যা: ${bn(filtered.length)}টি</div>
+  <div class="cover-tagline">মার্কসবাদী · নারীবাদী · উপনিবেশ-পরবর্তী · সমাজবিজ্ঞানিক · দার্শনিক · অর্থনৈতিক</div>
+  <div class="cover-num">প্রথম সংস্করণ</div>
+  <div style="font-size:8pt;color:rgba(240,230,214,.3);margin-top:8mm">রপ্তানিকৃত: ${dateStr}</div>
+</div>
+<div class="pdf-page" style="padding-top:20mm">
+  <div class="toc-section">
+    <div class="toc-title">সূচীপত্র</div>
+    <div class="toc-title-divider"></div>
+    ${tocItems}
+    <div class="footer-note">— সমাপ্ত —</div>
+  </div>
+</div>
+${pages}
+</body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if (win) {
+    win.onload = () => {
+      win.focus();
+      win.print();
+    };
+  } else {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (isEssay ? 'probondho-sonkolon-' : 'gurontho-somalochona-') + new Date().toISOString().slice(0,10) + '.html';
+    a.click();
+  }
+  URL.revokeObjectURL(url);
+  toast('PDF রপ্তানি সম্পন্ন হয়েছে।', 'success');
+}
+
+function exportSingleBookPDF(){
+  if (!currentBookId) { toast('কোনো কন্টেন্ট পাওয়া যায়নি', 'error'); return; }
+  const b = books.find(x => x.id === currentBookId);
+  if (!b) return;
+
+  const isEssay = (b.mode||'critique') === 'essay';
+  const dateStr = new Date().toLocaleDateString('bn-BD', { year:'numeric', month:'long', day:'numeric' });
+
+  function bn(n){const b=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];return String(n).replace(/[0-9]/g,d=>b[d])}
+
+  let h = `<div class="pdf-page">
+    <div class="page-header"><span>${b.bookName} ${isEssay ? '' : ' — ' + b.authorName}</span></div>
+    <div class="section-header"><div class="section-number">১</div><div class="section-title">${b.bookName}</div>${isEssay ? '' : `<div class="section-title-light">${b.authorName}</div>`}<div class="section-divider"></div></div>
+    <div class="novel-header"><div class="novel-title-bn">${b.bookName}</div>${b.bookNameEn?`<div class="novel-title-en">${b.bookNameEn}</div>`:''}${isEssay ? '' : `<div class="novel-meta">লেখক: ${b.authorName}${b.pubYear?' | প্রকাশকাল: '+b.pubYear:''}</div>`}</div>`;
+  if (b.epigraph) h += `<div class="epigraph"><div class="epigraph-text">"${b.epigraph}"</div></div>`;
+  
+  if (!isEssay) {
+    h += `<h2>১.১ লেখকের পরিচিতি: ${b.authorName}</h2><div class="author-profile"><div class="author-name">${b.authorName}</div>`;
+    if (b.authorNameEn) h += `<div class="author-name-en">${b.authorNameEn}${b.authorDates?' ('+b.authorDates+')':''}</div>`;
+    h += `<dl class="author-detail">`;
+    if (b.authorDates) h += `<dt>সময়কাল:</dt><dd>${b.authorDates}</dd>`;
+    if (b.authorEdu) h += `<dt>শিক্ষা:</dt><dd>${b.authorEdu}</dd>`;
+    if (b.authorAwards) h += `<dt>পুরস্কার:</dt><dd>${b.authorAwards}</dd>`;
+    h += `</dl></div>`;
+    h += parseRichText(b.authorBio);
+    
+    if (b.chars && b.chars.length > 0){
+      h += `<h2>১.২ চরিত্র পরিচিতি</h2>`;
+      b.chars.forEach(c => { h += `<div class="char-card"><div class="char-name">${c.name}</div><p class="char-desc">${c.desc||''}</p></div>`; });
+    }
+  } else {
+    if (b.authorBio) {
+      h += `<h2>১.১ পরিচিতি</h2>`;
+      h += parseRichText(b.authorBio);
+    }
+  }
+  
+  let si = isEssay ? (b.authorBio ? 2 : 1) : ((b.chars?.length||0) > 0 ? 3 : 2);
+  (b.analyses||[]).forEach(a => {
+    const num = bn(si);
+    h += `<h2>১.${num} ${a.title}</h2>`;
+    let contentHTML = textToParas(a.body, a);
+    if (a.type === 'blockquote'){
+      h += `<blockquote>${contentHTML}</blockquote>`;
+    } else if (a.type && a.type.startsWith('analysis-')){
+      const cls = a.type === 'analysis-blue' ? ' blue-box' : a.type === 'analysis-red' ? ' red-box' : '';
+      h += `<div class="analysis-box${cls}"><div class="analysis-box-title"><svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> ${a.title}</div>${contentHTML}</div>`;
+    } else {
+      h += contentHTML;
+    }
+    si++;
+  });
+  
+  h += `<h2>১.${bn(si)} ${isEssay ? 'উপসংহার' : 'সারসংক্ষেপ ও মূল্যায়ন'}</h2>`;
+  h += parseRichText(b.summary);
+  h += `</div>`;
+
+  const html = `<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8"><title>${b.bookName}</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&family=Noto+Serif+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Noto Serif Bengali','Noto Sans Bengali',serif;background:#fff;color:#2C2420;line-height:1.85;-webkit-font-smoothing:antialiased;margin:0;padding:0}
+  @page{size:A4;margin:20mm}
+  .pdf-page{width:100%;margin:0 auto;background:#fff;position:relative;page-break-after:always;padding-top:6mm}
+  .pdf-page > h2, .analysis-box, .rich-quote, .analysis-img-block, .analysis-table-wrap, .author-profile, .char-card { page-break-inside: avoid; }
+  .pdf-page > h2 { page-break-after: avoid; }
+  .page-header{position:absolute;top:0;left:0;right:0;text-align:center;font-size:7pt;color:#8A7E75;font-style:italic;border-bottom:.5px solid #E8D5B0;padding-bottom:2px}
+  .running-title{position:absolute;top:0;left:0;right:0;text-align:center;font-size:7pt;color:#8A7E75;font-style:italic;border-bottom:.5px solid #E8D5B0;padding-bottom:2px}
+  .section-header{text-align:center;margin-bottom:26px;padding-top:40px}
+  .section-number{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#8B5E3C;color:#fff;font-size:11pt;font-weight:600;margin-bottom:8px}
+  .section-title{font-size:17pt;font-weight:700;color:#2C2420;line-height:1.5}
+  .section-title-light{font-size:11.5pt;font-weight:400;color:#8A7E75;margin-top:3px}
+  .section-divider{width:70px;height:2px;background:linear-gradient(90deg,transparent,#8B5E3C,transparent);margin:10px auto 0}
+  h2{font-size:14.5pt;font-weight:700;color:#2C2420;margin-top:24px;margin-bottom:12px;padding-bottom:5px;border-bottom:1px solid #E8D5B0;line-height:1.5;padding-top:6mm}
+  p{font-size:10.5pt;text-align:justify;margin-bottom:10px;line-height:1.9;text-indent:0}
+  .drop-cap::first-letter{font-size:3em;float:left;line-height:.78;margin:3px 7px 0 0;color:#8B5E3C;font-weight:700}
+  blockquote{margin:14px 0;padding:12px 18px;border-left:3px solid #8B5E3C;background:rgba(139,94,60,.04);border-radius:0 6px 6px 0;font-style:italic}
+  blockquote p{text-indent:0;font-size:10pt;color:#5A4E45}
+  .rich-list{margin:12px 0 12px 28px;padding:0}
+  .rich-list li{font-size:10.5pt;line-height:1.9;color:#2C2420;margin-bottom:6px;padding-left:6px}
+  .rich-list ul, .rich-list ol{margin-top:6px;margin-bottom:6px}
+  .rich-list[data-type="bn"]{list-style-type:bengali}
+  .rich-list[data-type="1"]{list-style-type:decimal}
+  .char-card{background:rgba(255,255,255,.6);border:1px solid #E8D5B0;border-radius:7px;padding:14px 18px;margin:12px 0;position:relative}
+  .char-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:#8B5E3C;border-radius:7px 0 0 7px}
+  .char-name{font-size:11.5pt;font-weight:700;color:#8B5E3C;margin-bottom:4px}
+  .char-desc{font-size:9.5pt;color:#5A4E45;line-height:1.75;text-indent:0}
+  .author-profile{background:linear-gradient(135deg,rgba(139,94,60,.06),rgba(184,147,90,.04));border:1px solid #E8D5B0;border-radius:8px;padding:16px 18px;margin:16px 0}
+  .author-name{font-size:14pt;font-weight:700;color:#2C2420;margin-bottom:3px}
+  .author-name-en{font-size:9.5pt;color:#8A7E75;font-family:Georgia,serif;margin-bottom:10px}
+  .author-detail{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:9.5pt;margin:10px 0}
+  .author-detail dt{font-weight:600;color:#8B5E3C}
+  .author-detail dd{color:#5A4E45}
+  .analysis-box{background:rgba(158,74,74,.04);border:1px solid rgba(158,74,74,.18);border-radius:10px;padding:14px 18px;margin:6px 0!important;text-align:left!important}
+  .analysis-box-title{font-size:11pt;font-weight:700;color:#5C7A5E;margin-bottom:6px;display:flex;align-items:center;gap:6px;text-align:left!important;justify-content:flex-start!important}
+  .analysis-box p{font-size:10pt;color:#5A4E45;text-indent:0;text-align:justify}
+  .analysis-box.blue-box{background:rgba(74,109,124,.06);border-color:rgba(74,109,124,.2)}
+  .analysis-box.blue-box .analysis-box-title{color:#4A6D7C}
+  .analysis-box.red-box{background:rgba(158,74,74,.04);border-color:rgba(158,74,74,.18)}
+  .analysis-box.red-box .analysis-box-title{color:#9E4A4A}
+  .analysis-box.red-box div{text-align:left!important}
+  .epigraph{text-align:center;margin:24px 0;padding:16px 28px;font-style:italic;color:#5A4E45}
+  .epigraph::before,.epigraph::after{content:'';display:block;width:24px;height:6px;margin:8px auto;background:linear-gradient(90deg,transparent,#B8935A,transparent);border-radius:50%;opacity:.7}
+  .epigraph-text{font-size:11pt;line-height:1.9}
+  .novel-header{text-align:center;margin:16px 0 22px;padding:20px;background:linear-gradient(135deg,rgba(139,94,60,.08),rgba(184,147,90,.04));border-radius:8px;border:1px solid #E8D5B0}
+  .novel-title-bn{font-size:16pt;font-weight:800;color:#2C2420;line-height:1.5}
+  .novel-title-en{font-size:9.5pt;color:#8A7E75;font-family:Georgia,serif;margin-top:2px}
+  .page-footer-marker{text-align:center;font-size:9pt;color:#8A7E75;font-style:italic;margin-top:36px}
+  .ico{display:inline-block;vertical-align:middle}
+  .rich-quote {
+    position: relative; margin: 28px 0; padding: 24px 30px;
+    background: linear-gradient(135deg, rgba(184,147,90,0.06), rgba(139,94,60,0.02));
+    border-radius: 12px;
+    font-family: 'Noto Serif Bengali', serif; font-style: italic;
+    font-size: 11.5pt; line-height: 1.9; color: #2C2420;
+    width: 100%;
+  }
+  .rich-quote::before {
+    content: '"'; position: absolute; left: 10px; top: -10px;
+    font-family: Georgia, serif; font-size: 50pt; color: #8B5E3C;
+    line-height: 1; opacity: 0.25; font-style: normal;
+  }
+  .rich-quote::after {
+    content: '"'; position: absolute; right: 14px; bottom: -30px;
+    font-family: Georgia, serif; font-size: 50pt; color: #8B5E3C;
+    line-height: 1; opacity: 0.25; font-style: normal;
+  }
+  .quote-text-left { text-align: left; border-left: 4px solid #8B5E3C; border-radius: 0 12px 12px 0; padding-left: 40px; margin-left: 0; max-width: 100%; }
+  .quote-text-center { text-align: center; border-top: 2px solid rgba(139,94,60,.3); border-bottom: 2px solid rgba(139,94,60,.3); border-radius: 16px; }
+  .rich-quote p { margin: 0 0 8px 0 !important; padding: 0 !important; text-indent: 0 !important; text-align: inherit !important; }
+  .rich-quote p:last-child { margin-bottom: 0 !important; }
+  
+  /* PDF MODERN TABLE — full width, colorful */
+  .analysis-table-wrap{margin:20px 0;width:100%}
+  .analysis-table-caption{font-size:10.5pt;font-weight:600;color:#8B5E3C;text-align:left;padding:0 4px 10px;font-family:'Noto Sans Bengali',sans-serif;line-height:1.5}
+  .analysis-table-box{width:100%;overflow:hidden;border-radius:10px;border:1.5px solid #ddd;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+  .analysis-table{width:100%;border-collapse:collapse;font-family:'Noto Sans Bengali',sans-serif;font-size:10pt;text-align:left}
+  .analysis-table thead tr{background:linear-gradient(135deg,#4A6D7C,#3B5A69)}
+  .analysis-table thead th{padding:12px 18px;text-align:left;font-weight:700;font-size:10pt;color:#fff;border-bottom:2.5px solid rgba(0,0,0,.1);border-right:1px solid rgba(255,255,255,.15)}
+  .analysis-table thead th:last-child{border-right:none}
+  .analysis-table tbody tr:nth-child(odd){background:#F8FAFB}
+  .analysis-table tbody tr:nth-child(even){background:#EBF3F7}
+  .analysis-table tbody td{padding:11px 18px;border-bottom:1px solid #E0EBF0;border-right:1px solid #E0EBF0;color:#334155}
+  .analysis-table tbody tr:last-child td{border-bottom:none}
+  .analysis-table tbody td:last-child{border-right:none}
+  .analysis-img-block{margin:24px auto;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .analysis-img-wrap{margin:0 auto;max-width:80%;border-radius:12px;border:1px solid #E8E0D4;overflow:hidden;background:#fff;line-height:0;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+  .analysis-img-wrap img{width:100%;height:auto;object-fit:contain;max-height:400px}
+  .analysis-img-caption{font-size:9.5pt;color:#8A7E75;font-style:italic;text-align:center;margin-top:10px;padding:0 12px;line-height:1.5;font-family:'Noto Sans Bengali',sans-serif}
+</style></head><body>
+${h}
+</body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if (win) {
+    win.onload = () => {
+      win.focus();
+      win.print();
+    };
+  } else {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = b.bookName + '-' + new Date().toISOString().slice(0,10) + '.html';
+    a.click();
+  }
+  URL.revokeObjectURL(url);
+  toast('PDF রপ্তানি সম্পন্ন হয়েছে।', 'success');
 }
 
 async function importData(e){
