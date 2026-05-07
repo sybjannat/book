@@ -1481,7 +1481,7 @@ try {
 let books = JSON.parse(localStorage.getItem('_cache_books') || '[]');
 let currentMode = localStorage.getItem('currentMode') || 'critique';
 let charCount = 0, analysisCount = 0;
-let currentView = 'dashboard';
+let currentView = localStorage.getItem('currentView') || 'dashboard';
 let currentBookId = null;
 let editingBookId = null;
 let currentFilter = 'all';
@@ -1694,9 +1694,9 @@ function showMainApp(){
   if (authOverlay) authOverlay.style.display = 'none';
   if (authModal) authModal.style.display = 'none';
   if (app) app.style.display = 'flex';
-  // Initialize app state
+  // Initialize and restore previous state seamlessly
   setMode(currentMode);
-  renderDashboard();
+  navigate(currentView);
 }
 
 async function updateSettingsProfile() {
@@ -1983,8 +1983,12 @@ function setMode(mode) {
   
   // Refresh standard states
   refreshUI();
-  if (currentView !== 'dashboard' && currentView !== 'settings') {
-    navigate('dashboard');
+  
+  // Stay at the previous view tab before leaving / changing instead of bouncing back to dashboard
+  if (mode === 'essay' && (currentView === 'authors' || currentView === 'characters')) {
+    navigate('library');
+  } else {
+    navigate(currentView);
   }
 }
 
@@ -2243,8 +2247,10 @@ function exportAuthorsPDF(){
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Noto Serif Bengali','Noto Sans Bengali',serif;background:#fff;color:#2C2420;line-height:1.85}
   @page{size:A4;margin:20mm}
-  .pdf-page{width:100%;padding:10mm 12mm;margin:0 auto;page-break-after:always}
+  .pdf-page{width:100%;padding:12mm 14mm;margin:0 auto;page-break-after:always}
   .pdf-page:last-child{page-break-after:auto}
+  .pdf-page h2, .pdf-page p, .pdf-page blockquote, .pdf-page .analysis-box, .pdf-page .rich-quote, .pdf-page .analysis-img-block, .pdf-page .analysis-table-wrap, .pdf-page .author-profile, .pdf-page .char-card { page-break-inside: avoid; }
+  .pdf-page h2 { page-break-after: avoid; padding-top: 20px; }
   h2{font-size:16pt;font-weight:700;color:#2C2420}
   .cover{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:calc(297mm - 40mm);padding:0 20px;background:linear-gradient(160deg,#2C2420 0%,#3D3229 30%,#4A3C30 60%,#5A4E40 100%);color:#F0E6D6;page-break-after:always}
   .cover-title{font-size:28pt;font-weight:700;line-height:1.5}
@@ -2399,6 +2405,7 @@ function navigate(view, opts={}){
   const navBtn = document.querySelector(`.nav-item[data-view="${view}"]`);
   if (navBtn) navBtn.classList.add('active');
   currentView = view;
+  localStorage.setItem('currentView', view);
   window.scrollTo(0, 0);
 
   // Topbar updates
