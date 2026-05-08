@@ -685,24 +685,11 @@
   .toast.success{background:#2D5F3F}
   .toast.error{background:#7A2424}
 
-  /* ===== MODERN LOADING OVERLAY ===== */
-  .loading-overlay{
-    position:fixed;inset:0;z-index:22000;display:none;align-items:center;justify-content:center;
-    background:rgba(250,247,242,.86);backdrop-filter:blur(10px);padding:18px;
-  }
-  .loading-overlay.show{display:flex}
-  .loading-card{
-    width:min(92vw,320px);background:var(--bg-elev);border:1px solid var(--border);
-    border-radius:18px;padding:24px 22px;text-align:center;box-shadow:var(--shadow-lg);
-    font-family:'Noto Sans Bengali',sans-serif;
-  }
-  .loading-spinner{
-    width:44px;height:44px;border-radius:50%;margin:0 auto 14px;
-    border:4px solid rgba(139,94,60,.12);border-top-color:var(--accent);
-    animation:spin .8s linear infinite;
-  }
-  .loading-title{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:4px}
-  .loading-sub{font-size:12px;color:var(--ink-lighter);line-height:1.5}
+  /* ===== LOADING OVERLAY ===== */
+  #loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:30000;flex-direction:column;align-items:center;justify-content:center}
+  #loading-overlay.show{display:flex}
+  #loading-overlay .spinner{width:60px;height:60px;border:4px solid rgba(255,255,255,.15);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+  #loading-overlay .loading-text{color:#fff;font-size:14px;margin-top:16px;font-family:'Noto Sans Bengali',sans-serif}
 
   /* ===== PWA SPLASH SCREEN ===== */
   #splash-screen {
@@ -1425,13 +1412,10 @@
 <!-- TOAST -->
 <div id="toast" class="toast"></div>
 
-<!-- APP LOADING OVERLAY -->
-<div id="app-loading" class="loading-overlay" aria-live="polite" aria-busy="true">
-  <div class="loading-card">
-    <div class="loading-spinner"></div>
-    <div class="loading-title" id="loading-title">লোড হচ্ছে...</div>
-    <div class="loading-sub" id="loading-sub">অনুগ্রহ করে অপেক্ষা করুন</div>
-  </div>
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text">লোড হচ্ছে...</div>
 </div>
 
 <!-- AUTHOR DRAWER -->
@@ -1576,7 +1560,6 @@ async function handleAuthSubmit(type=authMode){
   }
   
   try {
-    showAppLoading(type === 'login' ? 'লগইন হচ্ছে...' : 'অ্যাকাউন্ট তৈরি হচ্ছে...', 'ডেটা প্রস্তুত করা হচ্ছে');
     setSyncStatus('syncing', 'প্রবেশ করা হচ্ছে...');
     if (type === 'login') {
       const { data, error } = await sb.auth.signInWithPassword({ email, password });
@@ -1612,22 +1595,23 @@ async function handleAuthSubmit(type=authMode){
     console.error('Auth error:', e);
     toast(e.message || 'অথেন্টিকেশন ব্যর্থ', 'error');
     setSyncStatus('error');
-  } finally {
-    hideAppLoading();
   }
 }
 
 async function handleLogout(){
   if (!confirm('আপনি কি নিশ্চিত যে সাইন আউট করতে চান?')) return;
   try {
-    showAppLoading('লগআউট হচ্ছে...', 'সেশন বন্ধ করা হচ্ছে');
+    // Show loading overlay during logout
+    $('loading-overlay').classList.add('show');
     await sb.auth.signOut();
     toast('সাইন আউট সফল হয়েছে', 'success');
     await checkSession();
   } catch (e) {
     console.error('Logout error:', e);
+    toast('সাইন আউট ব্যর্থ হয়েছে', 'error');
   } finally {
-    hideAppLoading();
+    // Hide loading overlay after logout completes
+    $('loading-overlay').classList.remove('show');
   }
 }
 
@@ -1675,37 +1659,44 @@ async function fetchUserProfile(userId){
 
 async function checkSession(){
   if (!sb) return;
-  const { data: { session }, error } = await sb.auth.getSession();
   
-  if (session && session.user) {
-    currentUser = session.user;
-    await fetchUserProfile(session.user.id);
+  // Show loading overlay during auth check
+  $('loading-overlay').classList.add('show');
+  
+  try {
+    const { data: { session }, error } = await sb.auth.getSession();
     
-    // Unlock app and hide login modal
-    appLocked = false;
-    closeLoginModal(true);
-    $('nav-login-btn').style.display = 'none';
-    $('nav-user-profile').style.display = 'block';
+    if (session && session.user) {
+      currentUser = session.user;
+      await fetchUserProfile(session.user.id);
+      
+      // Unlock app and hide login modal
+      appLocked = false;
+      closeLoginModal(true);
+      $('nav-login-btn').style.display = 'none';
+      $('nav-user-profile').style.display = 'block';
+      
+      // Show main app
+      showMainApp();
+    } else {
+      // Lock app and show login
+      currentUser = null;
+      userProfile = null;
+      isAdmin = false;
+      appLocked = true;
+      $('nav-login-btn').style.display = 'flex';
+      $('nav-user-profile').style.display = 'none';
+      
+      // Force login modal
+      showAuthView();
+    }
     
-    // Display elements are removed from sidebar as per request
-    
-    // Show main app
-    showMainApp();
-  } else {
-    // Lock app and show login
-    currentUser = null;
-    userProfile = null;
-    isAdmin = false;
-    appLocked = true;
-    $('nav-login-btn').style.display = 'flex';
-    $('nav-user-profile').style.display = 'none';
-    
-    // Force login modal
-    showAuthView();
+    // Dynamic UI Access Control based on Admin status
+    updateAccessControlUI();
+  } finally {
+    // Hide loading overlay after auth check completes
+    $('loading-overlay').classList.remove('show');
   }
-  
-  // Dynamic UI Access Control based on Admin status
-  updateAccessControlUI();
 }
 
 function showAuthView(){
@@ -2369,19 +2360,6 @@ function toast(msg, type=''){
   window._toastTO = setTimeout(()=>t.classList.remove('show'), 3500);
 }
 
-function showAppLoading(title='লোড হচ্ছে...', sub='অনুগ্রহ করে অপেক্ষা করুন'){
-  const overlay = $('app-loading');
-  if (!overlay) return;
-  $('loading-title').textContent = title;
-  $('loading-sub').textContent = sub;
-  overlay.classList.add('show');
-}
-
-function hideAppLoading(){
-  const overlay = $('app-loading');
-  if (overlay) overlay.classList.remove('show');
-}
-
 async function save(book){
   if (book){
     // Save single book to Supabase
@@ -2550,16 +2528,15 @@ function renderDashboard(){
   list.innerHTML = recent.map((b, i) => {
     const initial = (b.bookName || '?').trim().charAt(0);
     const colorClass = ['c1','c2','c3','c4',''][b.id % 5];
-    const editHTML = isAdmin ? `<button class="recent-edit" title="সম্পাদনা" onclick="editBook(${b.id},event)">
-        <svg class="icon icon-md"><use href="#i-edit"/></svg>
-      </button>` : '';
     return `<div class="recent-item" onclick="openBook(${b.id})">
       <div class="recent-cover ${colorClass}">${initial}</div>
       <div class="recent-info">
         <div class="recent-title">${b.bookName}</div>
         <div class="recent-meta">${b.authorName}${b.pubYear ? ' • '+b.pubYear : ''}</div>
       </div>
-      ${editHTML}
+      ${isAdmin ? `<button class="recent-edit" title="সম্পাদনা" onclick="editBook(${b.id},event)">
+        <svg class="icon icon-md"><use href="#i-edit"/></svg>
+      </button>` : ''}
       <svg class="icon icon-md" style="color:var(--ink-mute)"><use href="#i-arrow-right"/></svg>
     </div>`;
   }).join('');
@@ -2697,16 +2674,15 @@ function renderLibrary(){
 
   let html = list.map(b => {
     const grad = colors[b.id % colors.length];
-    const actionsHTML = isAdmin ? `<div class="book-actions">
+    return `<div class="book-card" onclick="openBook(${b.id})">
+      ${isAdmin ? `<div class="book-actions">
         <button title="সম্পাদনা করুন" onclick="editBook(${b.id},event)">
           <svg class="icon icon-sm"><use href="#i-edit"/></svg>
         </button>
         <button class="danger" title="মুছে ফেলুন" onclick="deleteBookById(${b.id},event)">
           <svg class="icon icon-sm"><use href="#i-trash"/></svg>
         </button>
-      </div>` : '';
-    return `<div class="book-card" onclick="openBook(${b.id})">
-      ${actionsHTML}
+      </div>` : ''}
       <div class="book-cover" style="background:${grad}">
         <div class="book-cover-text">
           <div class="book-cover-title">${b.bookName}</div>
